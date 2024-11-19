@@ -63,6 +63,13 @@ const loginUsuario = async (req, res = express.response) => {
 
          // Confirmar contraseña
         const usuario = resul[0];
+        if(usuario.activo===0){
+            return res.status(400).json({
+                msg: 'Este Usuario esta inactivo',
+    
+            });
+         }
+
         const validPassword = bcrypt.compareSync(contraseña, usuario.contraseña);
 
         if(!validPassword){
@@ -125,9 +132,58 @@ const getUsuarios=async(req, res = express.response)=>{
     }
 
 }
+
+    const actualizarUsuario=async(req,res=express.response)=>{
+        const { nombre, correo, username, activo, celular, rol } = req.body;
+        const {id}=req.params;
+        const{uid}=req
+        try {
+        
+            if (String(uid) === id) {
+                return res.status(404).json({
+                    ok: false,
+                    msg: 'El Mismo Usuario No puede Actualizarse'
+                });
+            }
+            
+        const consulta= `UPDATE usuario
+        SET 
+           nombre = ?,
+           correo = ?,
+           username = ?,
+           activo = ?,
+           celular = ?,
+           rol = ?
+        WHERE idusuario = ?`;
+      
+        
+        const resul= await ejecutarConsulta(consulta,[nombre, correo, username, activo, celular, rol, id]); 
+
+        if (resul.affectedRows === 0) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'El usuario con el ID especificado no existe'
+            });
+        }
+           
+           return res.status(200).json({
+            ok: true,
+            msg:'Se actualizo correctamente el usuario'
+           })
+
+        }  catch (error) {
+            console.log(error)
+           return res.status(400).json({
+             ok:false,
+             msg:'Error en actualizar usuario'
+      })
+      }
+
+    }
 module.exports = {
     crearUsuario,
     loginUsuario,
     revalidarToken,
-    getUsuarios
+    getUsuarios,
+    actualizarUsuario
 };

@@ -7,7 +7,7 @@
 const {Router}=require('express')
 const {check}=require('express-validator')
 const router=Router();
-const {crearUsuario, loginUsuario, revalidarToken, getUsuarios}=require('../controllers/auth');
+const {crearUsuario, loginUsuario, revalidarToken, getUsuarios, actualizarUsuario}=require('../controllers/auth');
 const { validarCampos } = require('../middlewares/validar-campos');
 const {validarJWT}=require('../middlewares/validar-jwt')
 
@@ -44,6 +44,16 @@ router.post(
 router.get('/renew',validarJWT,revalidarToken)
 
 router.get('/users',getUsuarios)
+
+router.put('/:id',[
+  check('nombre', 'El nombre es obligatorio').not().isEmpty(),
+      check('correo', 'El correo es obligatorio').not().isEmpty(),
+      check('username', 'El username es obligatorio').not().isEmpty(),
+      check('activo', 'El activo es obligatorio').not().isEmpty(),
+      check('celular', 'El celular es obligatorio').not().isEmpty(),
+      check('rol', 'El rol es obligatorio').not().isEmpty(),
+      validarJWT
+],actualizarUsuario)
     
 
 
