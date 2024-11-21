@@ -19,6 +19,8 @@ app.use(express.json())
 //RUTAS
 app.use('/api/auth',require('./routes/auth')) 
 
+app.use('/api/periody',require('./routes/periodo'))
+
 //Escuchar peticiones 
 app.listen(process.env.PORT,()=>{
     console.log(`Servidor corriendo en puerto ${process.env.PORT}`)
