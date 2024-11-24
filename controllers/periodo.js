@@ -135,8 +135,8 @@ const crearPeriodo = async (req, res = express.response) => {
         `;
 
         for (const presupuesto of presupuestos) {
-            const { tipo, prodim, indirectos, monto_inici, monto_rest } = presupuesto;
-
+            const { tipo, prodim, indirectos, monto_inici  } = presupuesto;
+            const monto_rest=monto_inici
             await ejecutarConsulta(consultaInsertPresupuesto, [
                 tipo,
                 prodim,
@@ -170,8 +170,30 @@ const crearPeriodo = async (req, res = express.response) => {
     }
 };
 
+const obtenerPeriodos=async(req, res = express.response)=>{
+    try {
+        const { idperiodo } = req.query;
+        const consultaPresupuestos=` SELECT * FROM presupuesto where periodo_idperiodo = ?`
+        const prusupuestosCreados=await ejecutarConsulta(consultaPresupuestos,[idperiodo])
+        return res.status(200).json({
+            ok: true,
+            msg: 'Presupuestos encontrados',
+            presupuestos:prusupuestosCreados
+        });
+        
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            ok: false,
+            msg: 'Algo salió mal.',
+            error: error.message,
+        });
+    }
+}
+
 
 module.exports = {
     buscarPeriodo,
-    crearPeriodo
+    crearPeriodo,
+    obtenerPeriodos
 };

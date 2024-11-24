@@ -142,7 +142,7 @@ const getUsuarios=async(req, res = express.response)=>{
             if (String(uid) === id && activo === 0) {
                 return res.status(404).json({
                     ok: false,
-                    msg: 'El usuario logeado no puede darse de baja el mismo'
+                    msg: 'El usuario en Sesion no puede darse de baja el mismo'
                 });
             }
             
