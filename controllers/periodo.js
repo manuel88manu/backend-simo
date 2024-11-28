@@ -170,7 +170,7 @@ const crearPeriodo = async (req, res = express.response) => {
     }
 };
 
-const obtenerPeriodos=async(req, res = express.response)=>{
+const obtenerPeriodos=async(req, res = express.response)=>{ 
     try {
         const { idperiodo } = req.query;
         const consultaPresupuestos=` SELECT * FROM presupuesto where periodo_idperiodo = ?`
