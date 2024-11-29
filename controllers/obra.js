@@ -95,12 +95,11 @@ const agregarObra = async (req, res = express.response) => {
     }
 };
 
-
-const agregarConcepto=async (req, res = express.response) => {
+const agregarPartida=async (req, res = express.response) => {
 
     try {
 
-        const {obra_idobra,nombre_conc}=req.body;
+        const {obra_idobra,nombre_par}=req.body;
 
         const ValidarObra=`select * from obra where idobra=?`;
 
@@ -113,23 +112,23 @@ const agregarConcepto=async (req, res = express.response) => {
             });
         }
 
-        const conceptoExiste=`select * from concepto where nombre_conc = ?`
-        const resuConceptoExiste= await ejecutarConsulta(conceptoExiste,[nombre_conc])
+        const partidaExiste=`select * from partida where nombre_par = ?`
+        const resuPartidaExiste= await ejecutarConsulta(partidaExiste,[nombre_par])
 
-        if(resuConceptoExiste.length>0){
+        if(resuPartidaExiste.length>0){
             return res.status(401).json({
                 ok: false,
-                msg: 'El concepto que se desea ingresar ya existe',
+                msg: 'La partida que se desea ingresar ya existe',
             });
         }
 
-        const insertarConcepto=`insert into concepto (obra_idobra,nombre_conc) values
+        const insertarPartida=`insert into partida (obra_idobra,nombre_par) values
                                 (?,?)`;
-        const resulConcepto= await ejecutarConsulta(insertarConcepto,[obra_idobra,nombre_conc])
+        const resulConcepto= await ejecutarConsulta(insertarPartida,[obra_idobra,nombre_par])
 
           return res.status(200).json({
             ok: true,
-            msg: 'concepto agregado',
+            msg: 'partida agregada con exito',
         });
 
     } catch (error) {
@@ -142,56 +141,57 @@ const agregarConcepto=async (req, res = express.response) => {
     }
 }
 
-const agregarPartida=async (req, res = express.response) => {
+const agregarConcepto=async (req, res = express.response) => {
     try {
         
-        const {concepto_idconcepto,partida} = req.body;
+        const {partida_idpartida,concepto} = req.body;
 
-        const conceptoExist=`select * from concepto where idconcepto=?`
-        const resultConcepto= await ejecutarConsulta(conceptoExist,[concepto_idconcepto])
+        const partidaExist=`select * from partida where idpartida=?`
+        const resultPartida= await ejecutarConsulta(partidaExist,[partida_idpartida])
 
-        if(resultConcepto.length===0){
+        if(resultPartida.length===0){
             return res.status(401).json({
                 ok: false,
-                msg: 'El concepto que se quiere relacionar no existe',
+                msg: 'La partida que se quiere relacionar no existe',
             });
 
         }
 
-        const partidaExiste=`select * from partida where nombre_par=?`
-        const resultPartida= await ejecutarConsulta(partidaExiste,[partida.nombre_par])
+        const conceptoExiste=`select * from concepto where nombre_conc=?`
+        const resultConcepto= await ejecutarConsulta(conceptoExiste,[concepto.nombre_conc])
 
-        if(resultPartida.length>0){
+        if(resultConcepto.length>0){
             return res.status(401).json({
                 ok: false,
-                msg: 'La partida que se quiere agregar ya existe',
+                msg: 'El concepto que se quiere agregar ya existe',
             });
         }
         
-        const ingresarPartida=`insert into partida (nombre_par,unidad,cantidad,p_unitario,concepto_idconcepto)
+        const ingresarConcepto=`insert into concepto (nombre_conc,unidad,cantidad,p_unitario,partida_idpartida)
                                 values
                                 (?,?,?,?,?)`
-        const resultIngresar= await ejecutarConsulta(ingresarPartida,[
-                            partida.nombre_par,
-                            partida.unidad,
-                            partida.cantidad,
-                            partida.p_unitario,
-                            concepto_idconcepto])
-        const obtenerMonto=`UPDATE partida
+        const resultIngresar= await ejecutarConsulta(ingresarConcepto,[
+                            concepto.nombre_conc,
+                            concepto.unidad,
+                            concepto.cantidad,
+                            concepto.p_unitario,
+                            partida_idpartida])
+
+        const obtenerMonto=`UPDATE concepto
                            SET monto = cantidad * p_unitario
-                           WHERE idpartida = ?;`
+                           WHERE idconcepto = ?;`
 
         await ejecutarConsulta(obtenerMonto,[resultIngresar.insertId])
 
-        const obtenerMontoConcepto= `UPDATE concepto c
+        const obtenerMontoPartida= `UPDATE partida p
                                     SET monto_tot = (
-                                         SELECT SUM(p.monto)
-                                         FROM partida p
-                                         WHERE p.concepto_idconcepto = c.idconcepto
+                                         SELECT SUM(c.monto)
+                                         FROM concepto c
+                                         WHERE c.partida_idpartida = p.idpartida
                                         )
-                                    WHERE c.idconcepto = ?`
+                                    WHERE p.idpartida = ?`
         
-        await ejecutarConsulta (obtenerMontoConcepto,[concepto_idconcepto])
+        await ejecutarConsulta (obtenerMontoPartida,[partida_idpartida])
 
         return res.status(200).json({
             ok: true,
@@ -208,6 +208,7 @@ const agregarPartida=async (req, res = express.response) => {
     }
 
 }
+
 module.exports = {
-    agregarObra,agregarConcepto,agregarPartida
+    agregarObra,agregarPartida,agregarConcepto
 };

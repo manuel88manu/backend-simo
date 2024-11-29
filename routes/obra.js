@@ -18,12 +18,12 @@ router.post(
 )
 
 router.post(
-    '/newconcepto',agregarConcepto
+    '/newpartida',agregarPartida
+
 )
 
 router.post(
-    '/newpartida',agregarPartida
-
+    '/newconcepto',agregarConcepto
 )
 
 
