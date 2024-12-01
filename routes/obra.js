@@ -8,7 +8,7 @@ const {check}=require('express-validator')
 const router=Router();
 const { validarCampos } = require('../middlewares/validar-campos');
 const {validarJWT}=require('../middlewares/validar-jwt');
-const { agregarObra, agregarConcepto, agregarPartida } = require('../controllers/obra');
+const { agregarObra, agregarConcepto, agregarPartida, actualizarPresupuesto } = require('../controllers/obra');
 
 
 
@@ -24,6 +24,10 @@ router.post(
 
 router.post(
     '/newconcepto',agregarConcepto
+)
+
+router.put(
+    '/updatapresu/:idobra',actualizarPresupuesto
 )
 
 

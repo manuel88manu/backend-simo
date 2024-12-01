@@ -17,12 +17,13 @@ const agregarObra = async (req, res = express.response) => {
         }
 
         // Validar si la obra ya existe con el mismo nombre y otros atributos
-        const validacionObra = `SELECT * FROM obra WHERE nombre = ? AND bene_unidad = ? AND subprograma = ? AND programa = ?`;
+        const validacionObra = `SELECT * FROM obra WHERE nombre = ? AND bene_unidad = ? AND subprograma = ? AND programa = ? AND Presupuesto_idPresupuesto = ?`;
         const valoresValidacion = [
             obra.nombre,
             obra.bene_unidad,
             obra.subprograma,
-            obra.programa
+            obra.programa,
+            Presupuesto_idPresupuesto
         ];
 
         const resultadoObraExistente = await ejecutarConsulta(validacionObra, valoresValidacion);
@@ -112,8 +113,8 @@ const agregarPartida=async (req, res = express.response) => {
             });
         }
 
-        const partidaExiste=`select * from partida where nombre_par = ?`
-        const resuPartidaExiste= await ejecutarConsulta(partidaExiste,[nombre_par])
+        const partidaExiste=`select * from partida where nombre_par = ? AND obra_idobra = ?`
+        const resuPartidaExiste= await ejecutarConsulta(partidaExiste,[nombre_par,obra_idobra])
 
         if(resuPartidaExiste.length>0){
             return res.status(401).json({
@@ -157,8 +158,8 @@ const agregarConcepto=async (req, res = express.response) => {
 
         }
 
-        const conceptoExiste=`select * from concepto where nombre_conc=?`
-        const resultConcepto= await ejecutarConsulta(conceptoExiste,[concepto.nombre_conc])
+        const conceptoExiste=`select * from concepto where nombre_conc= ? AND partida_idpartida = ?`
+        const resultConcepto= await ejecutarConsulta(conceptoExiste,[concepto.nombre_conc,partida_idpartida])
 
         if(resultConcepto.length>0){
             return res.status(401).json({
@@ -195,7 +196,7 @@ const agregarConcepto=async (req, res = express.response) => {
 
         return res.status(200).json({
             ok: true,
-            msg: 'partida agregada',
+            msg: 'Concepto agregado',
         });
 
     } catch (error) {
@@ -208,7 +209,433 @@ const agregarConcepto=async (req, res = express.response) => {
     }
 
 }
+const actualizarPresupuesto = async (req, res = express.response) => {
+    try {
+        const { idobra } = req.params;
+
+        // Consulta para obtener el tipo de presupuesto y la obra
+        const selectTipoObra = `
+            SELECT 
+                o.idobra,
+                p.tipo,
+                p.idpresupuesto
+            FROM 
+                obra o
+            JOIN 
+                presupuesto p 
+            ON 
+                o.presupuesto_idPresupuesto = p.idpresupuesto
+            WHERE 
+                o.idobra = ?;
+        `;
+        
+        const resultTipo = await ejecutarConsulta(selectTipoObra, [idobra]);
+
+        if (resultTipo.length === 0) {
+            return res.status(401).json({
+                ok: false,
+                msg: 'El id de la Obra no existe en la base de datos',
+            });
+        }
+
+        const tipo = resultTipo[0].tipo; // Tipo de presupuesto
+        const idpresupuesto = resultTipo[0].idpresupuesto;
+
+        // Consulta para obtener el presupuesto final
+        const selectPresupuestoObra = `
+            SELECT 
+                obra_idobra,
+                SUM(monto_tot) AS suma_monto_tot,
+                SUM(monto_tot) * 0.16 AS iva,
+                SUM(monto_tot) + (SUM(monto_tot) * 0.16) AS presupuesto_total
+            FROM 
+                partida
+            WHERE 
+                obra_idobra = ?
+            GROUP BY 
+                obra_idobra;
+        `;
+
+        const resulPresupuestoFinal = await ejecutarConsulta(selectPresupuestoObra, [idobra]);
+
+        if (resulPresupuestoFinal.length === 0) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No se encontraron partidas para esta obra.',
+            });
+        }
+
+        const presupuesto = resulPresupuestoFinal[0].presupuesto_total;
+        const iva = resulPresupuestoFinal[0].iva;
+
+        // Lógica condicional basada en el tipo de presupuesto
+        let resultadoAdicional = {};
+
+        switch (tipo) {
+            case 'estatal':
+            case 'odirectas':
+            case 'federal':
+            case 'fortamun':
+                try {
+
+                const selectMontoRes= `select monto_rest from presupuesto where idpresupuesto=?`
+                const resultMontoRes= await ejecutarConsulta(selectMontoRes,[idpresupuesto])
+                const montoRes= resultMontoRes[0].monto_rest
+
+               if(presupuesto>montoRes){
+                return res.status(401).json({
+                    ok: false,
+                    msg: `El presupuesto de esta obra excede el monto disponible para las obras ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}.`,
+                });
+               }
+
+               const presuEstatal=` UPDATE obra
+                                    SET presupuesto = ?
+                                    WHERE idobra = ? `;
+
+               await ejecutarConsulta(presuEstatal,[presupuesto,idobra])
+
+               const actualizarMontoRes=`
+                                         UPDATE presupuesto p
+                                         SET monto_rest = monto_inici - (
+                                         SELECT COALESCE(SUM(o.presupuesto), 0) 
+                                           FROM obra o
+                                           WHERE o.presupuesto_idPresupuesto = p.idpresupuesto
+                                         )
+                                       WHERE p.idpresupuesto = ?;
+                                      `;
+                                      
+                await ejecutarConsulta(actualizarMontoRes,[idpresupuesto])    
+
+                resultadoAdicional = {
+                    presupuesto:presupuesto
+                };
+            }
+                catch (error) {
+                    console.error(error);
+                    return res.status(500).json({
+                    ok: false,
+                    msg: 'Algo salió mal.',
+                    error: error.message,
+                    });
+                }
+                break;
+
+                case 'faismun':
+                    try {
+                        const verifiIndirecProdrim = `select prodim, indirectos from presupuesto where idPresupuesto=?`;
+                        const resulIndiPro = await ejecutarConsulta(verifiIndirecProdrim, [idpresupuesto]);
+                
+                        const prodim = resulIndiPro[0].prodim;
+                        const indirectos = resulIndiPro[0].indirectos;
+
+                        const selectMontoRes= `select monto_rest from presupuesto where idpresupuesto=?`
+                        const resultMontoRes= await ejecutarConsulta(selectMontoRes,[idpresupuesto])
+                        const montoRes= resultMontoRes[0].monto_rest
+
+                        const RecuperarMonto= await ejecutarConsulta(`select presupuesto from obra where idobra=?`,[idobra])
+                        const montoObra=RecuperarMonto[0].presupuesto
+
+                        const montoRestaurado=montoObra+montoRes;
+
+                        if(presupuesto>montoRestaurado){
+                         return res.status(401).json({
+                           ok: false,
+                           montoRestante:montoRes,
+                           montoObra:montoObra,
+                           montoRestaurado:montoRestaurado,
+                          msg: `El presupuesto de esta obra excede el monto disponible para las obras ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}.`,
+                          });
+                              }
+                
+                        // Lógica condicional para manejar los casos y asignar resultadoAdicional
+                        if (prodim === 1 && indirectos === 1) {
+                            
+                            const validarRubros=`select rubros from obra where idobra=?`
+
+                            const resultadorubros= await ejecutarConsulta(validarRubros,[idobra])
+                            const rubros=resultadorubros[0].rubros;
+
+                            if(rubros==='indirectos'){
+
+                                const obtnerPorcIndirecto=`SELECT monto_inici, 
+                                                          (monto_inici * 0.03) AS porcentaje_3
+                                                          FROM presupuesto
+                                                          WHERE idPresupuesto = ?;`
+
+                                const resultPorIndirecto= await ejecutarConsulta(obtnerPorcIndirecto,[idpresupuesto])
+                                const porIndirectos= resultPorIndirecto[0].porcentaje_3;
+
+                                const obtenerSumaIndirectos=`SELECT COALESCE(SUM(presupuesto), 0) 
+                                                             AS suma_presupuesto
+                                                             FROM obra
+                                                             WHERE presupuesto_idPresupuesto = ?
+                                                             AND rubros = 'indirectos'
+                                                             AND idobra != ?
+                                                             `
+
+                                const sumaIndirectosResult= await ejecutarConsulta(obtenerSumaIndirectos,[idpresupuesto,idobra])
+                                const sumaIndirectos=sumaIndirectosResult[0].suma_presupuesto;
+
+                                if ((sumaIndirectos + presupuesto) > porIndirectos) {
+                                    return res.status(401).json({
+                                        presupuesto:presupuesto,
+                                        sumaIndirectos:sumaIndirectos,
+                                        porIndectos:porIndirectos,
+                                        ok: false,
+                                        msg: `El presupuesto destinado para indirectos de Faismun no debe ser máximo del 3%, es decir, de $${porIndirectos} y el presupuesto estimado para la obra es de $${presupuesto} excede el maximo`,
+                                    });
+                                }
+
+                                const presuEstatal=` UPDATE obra
+                                    SET presupuesto = ?
+                                    WHERE idobra = ? `;
+
+                                await ejecutarConsulta(presuEstatal,[presupuesto,idobra])
+
+                                const actualizarMontoRes=`
+                                UPDATE presupuesto p
+                                SET monto_rest = monto_inici - (
+                                SELECT COALESCE(SUM(o.presupuesto), 0) 
+                                  FROM obra o
+                                  WHERE o.presupuesto_idPresupuesto = p.idpresupuesto
+                                )
+                              WHERE p.idpresupuesto = ?;
+                             `;
+                             
+                                await ejecutarConsulta(actualizarMontoRes,[idpresupuesto])
+                                
+                                
+                                resultadoAdicional = {
+                                    mensaje: "Ambos valores son 1",
+                                    presupuesto:presupuesto,
+                                    rubros:rubros,
+                                    porIndectos:porIndirectos,
+                                    sumaIndirectos:sumaIndirectos,
+                                };
+
+                            }
+                            else if(rubros==='prodim'){
+                                const obtnerPorcProdim=`SELECT monto_inici, 
+                                                          (monto_inici * 0.02) AS porcentaje_2
+                                                          FROM presupuesto
+                                                          WHERE idPresupuesto = ?;`
+
+                                const resultPorProdim= await ejecutarConsulta(obtnerPorcProdim,[idpresupuesto])
+                                const porProdim= resultPorProdim[0].porcentaje_2;
+
+                                const obtenerSumaProdim=`SELECT COALESCE(SUM(presupuesto), 0) 
+                                                             AS suma_presupuesto
+                                                             FROM obra
+                                                             WHERE presupuesto_idPresupuesto = ?
+                                                             AND rubros = 'prodim'
+                                                             AND idobra != ?
+                                                             `
+
+                                const sumaProdimResult= await ejecutarConsulta(obtenerSumaProdim,[idpresupuesto,idobra])
+                                const sumaProdim=sumaProdimResult[0].suma_presupuesto;
+
+                                if ((sumaProdim + presupuesto) > porProdim) {
+                                    return res.status(401).json({
+                                        presupuesto:presupuesto,
+                                        sumaProdim:sumaProdim,
+                                        porProdim:porProdim,
+                                        ok: false,
+                                        msg: `El presupuesto destinado para prodim de Faismun no debe ser máximo del 2%, es decir, de $${porProdim} y el presupuesto estimado para la obra es de $${presupuesto} excede el maximo`,
+                                    });
+                                }
+
+                                const presuEstatal=` UPDATE obra
+                                    SET presupuesto = ?
+                                    WHERE idobra = ? `;
+
+                                await ejecutarConsulta(presuEstatal,[presupuesto,idobra])
+
+                                const actualizarMontoRes=`
+                                UPDATE presupuesto p
+                                SET monto_rest = monto_inici - (
+                                SELECT COALESCE(SUM(o.presupuesto), 0) 
+                                  FROM obra o
+                                  WHERE o.presupuesto_idPresupuesto = p.idpresupuesto
+                                )
+                              WHERE p.idpresupuesto = ?;
+                             `;
+                             
+                                await ejecutarConsulta(actualizarMontoRes,[idpresupuesto])
+                                
+                                
+                                resultadoAdicional = {
+                                    mensaje: "Ambos valores son 1",
+                                    presupuesto:presupuesto,
+                                    rubros:rubros,
+                                    porIndectos:porProdim,
+                                    sumaIndirectos:sumaProdim,
+                                };
+
+                            }else {
+                                // Obtener monto inicial del presupuesto
+                                const obtenerMontoInicial = `
+                                    SELECT monto_inici
+                                    FROM presupuesto
+                                    WHERE idPresupuesto = ?;`;
+                            
+                                const resultMontoInicial = await ejecutarConsulta(obtenerMontoInicial, [idpresupuesto]);
+                                const montoInicial = resultMontoInicial[0].monto_inici;
+                            
+                                // Calcular el monto total destinado para indirectos y prodim (5%)
+                                const montoTotalIndirectosProdim = montoInicial * 0.05;  // 3% indirectos + 2% prodim
+                            
+                                // Obtener la suma actual de los presupuestos para indirectos y prodim
+                                const obtenerSumaIndirectosProdim = `
+                                    SELECT 
+                                        COALESCE(SUM(CASE WHEN rubros = 'indirectos' THEN presupuesto ELSE 0 END), 0) AS suma_indirectos,
+                                        COALESCE(SUM(CASE WHEN rubros = 'prodim' THEN presupuesto ELSE 0 END), 0) AS suma_prodim
+                                    FROM obra
+                                    WHERE presupuesto_idPresupuesto = ?
+                                    AND idobra != ?;`;
+                            
+                                const sumaTotalResult = await ejecutarConsulta(obtenerSumaIndirectosProdim, [idpresupuesto, idobra]);
+                                const sumaIndirectos = sumaTotalResult[0].suma_indirectos;
+                                const sumaProdim = sumaTotalResult[0].suma_prodim;
+                            
+                                // Calcular cuánto falta para completar el 5% total (indirectos + prodim)
+                                const montoFaltanteIndirectosProdim = montoTotalIndirectosProdim - (sumaIndirectos + sumaProdim);
+                                
+                                const montoRestanteConsulta = await ejecutarConsulta(`
+                                    SELECT monto_rest 
+                                    FROM presupuesto 
+                                    WHERE idPresupuesto = ?`, [idpresupuesto]);
+
+                                const montoRestantePresupuesto=montoRestanteConsulta[0].monto_rest;
+
+                                // Si falta algún monto para completar el 5%, validamos que no se afecte
+                                if (montoFaltanteIndirectosProdim > 0) {
+                                    // Si la obra no es de indirectos ni prodim
+                                    if (rubros !== 'indirectos' && rubros !== 'prodim') {
+                                        // Validamos que el monto restante sea suficiente para asignar el presupuesto a esta obra
+                                        if (presupuesto <= montoRestaurado) {
+                                            // Verificamos que el monto restante no afecte el monto faltante para indirectos y prodim
+                                            if (presupuesto > montoRestaurado - montoFaltanteIndirectosProdim) {
+                                                return res.status(401).json({
+                                                    presupuesto: presupuesto,
+                                                    montoFaltante: montoFaltanteIndirectosProdim,
+                                                    ok: false,
+                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos y prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`,
+                                                });
+                                            }
+                                        } else {
+                                            return res.status(401).json({
+                                                presupuesto: presupuesto,
+                                                montoFaltante: montoFaltanteIndirectosProdim,
+                                                ok: false,
+                                                msg: `No se puede asignar el presupuesto solicitado, ya que el monto_rest es insuficiente. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`,
+                                            });
+                                        }
+                                    }
+                                }
+                            
+                                // Si no hay problema con el monto faltante, se procede con la actualización
+                                const presuEstatal = `
+                                    UPDATE obra
+                                    SET presupuesto = ?
+                                    WHERE idobra = ?`;
+                            
+                                await ejecutarConsulta(presuEstatal, [presupuesto, idobra]);
+                            
+                                // Actualizar el monto_rest del presupuesto
+                                const actualizarMontoRes = `
+                                    UPDATE presupuesto p
+                                    SET monto_rest = monto_inici - (
+                                        SELECT COALESCE(SUM(o.presupuesto), 0) 
+                                        FROM obra o
+                                        WHERE o.presupuesto_idPresupuesto = p.idpresupuesto
+                                    )
+                                    WHERE p.idpresupuesto = ?;`;
+                            
+                                await ejecutarConsulta(actualizarMontoRes, [idpresupuesto]);
+                            
+                                resultadoAdicional = {
+                                    mensaje: "Presupuesto actualizado correctamente",
+                                    presupuesto: presupuesto,
+                                    rubros: rubros,
+                                    montoFaltante: montoFaltanteIndirectosProdim,
+                                };
+                            }
+                        } else if (prodim === 0 && indirectos === 0) {
+                            // Caso: Ambos son 0
+                            console.log("Ambos prodim e indirectos son 0");
+                            resultadoAdicional = {
+                                mensaje: "Ambos valores son 0",
+                                prodim: prodim,
+                                indirectos: indirectos,
+                            };
+                        } else if (prodim === 1 && indirectos === 0) {
+                            // Caso: Solo prodim es 1
+                            console.log("Solo prodim es 1");
+                            resultadoAdicional = {
+                                mensaje: "Solo prodim es 1",
+                                prodim: prodim,
+                                indirectos: indirectos,
+                            };
+                        } else if (prodim === 0 && indirectos === 1) {
+                            // Caso: Solo indirectos es 1
+                            console.log("Solo indirectos es 1");
+                            resultadoAdicional = {
+                                mensaje: "Solo indirectos es 1",
+                                prodim: prodim,
+                                indirectos: indirectos,
+                            };
+                        } else {
+                            // Caso: Ninguna de las condiciones se cumple
+                            console.log("Condiciones no esperadas");
+                            resultadoAdicional = {
+                                mensaje: "Condiciones no esperadas",
+                                prodim: prodim,
+                                indirectos: indirectos,
+                            };
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        return res.status(500).json({
+                            ok: false,
+                            msg: 'Algo salió mal.',
+                            error: error.message,
+                        });
+                    }
+                    break;
+
+            default:
+                // Lógica para tipos desconocidos
+                resultadoAdicional = {
+                    detalle: 'Tipo de presupuesto no reconocido.',
+                };
+                break;
+        }
+
+        // Respuesta final
+        return res.status(200).json({
+            ok: true,
+            msg: 'Presupuesto de Obra Actualizado',
+            tipo,
+            idpresupuesto,
+            resultadoAdicional,
+            iva,
+            // Información adicional basada en el tipo
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            ok: false,
+            msg: 'Algo salió mal.',
+            error: error.message,
+        });
+    }
+};
 
 module.exports = {
-    agregarObra,agregarPartida,agregarConcepto
+    agregarObra,
+    agregarPartida,
+    agregarConcepto,
+    actualizarPresupuesto
 };
