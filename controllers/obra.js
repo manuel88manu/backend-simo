@@ -277,14 +277,23 @@ const actualizarPresupuesto = async (req, res = express.response) => {
             case 'federal':
             case 'fortamun':
                 try {
+                
+                    const selectMontoRes= `select monto_rest from presupuesto where idpresupuesto=?`
+                    const resultMontoRes= await ejecutarConsulta(selectMontoRes,[idpresupuesto])
+                    const montoRes= resultMontoRes[0].monto_rest
 
-                const selectMontoRes= `select monto_rest from presupuesto where idpresupuesto=?`
-                const resultMontoRes= await ejecutarConsulta(selectMontoRes,[idpresupuesto])
-                const montoRes= resultMontoRes[0].monto_rest
+                    const RecuperarMonto= await ejecutarConsulta(`select presupuesto from obra where idobra=?`,[idobra])
+                    const montoObra=RecuperarMonto[0].presupuesto
 
-               if(presupuesto>montoRes){
+                    const montoRestaurado=montoObra+montoRes;
+
+               if(presupuesto>montoRestaurado){
                 return res.status(401).json({
                     ok: false,
+                    montoObra,
+                    montoRes,
+                    presupuesto,
+                    montoRestaurado,
                     msg: `El presupuesto de esta obra excede el monto disponible para las obras ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}.`,
                 });
                }
@@ -344,7 +353,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                            montoRestante:montoRes,
                            montoObra:montoObra,
                            montoRestaurado:montoRestaurado,
-                          msg: `El presupuesto de esta obra excede el monto disponible para las obras ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}.`,
+                          msg: `El presupuesto de esta obra $${presupuesto} excede el monto disponible de $${montoRestaurado} para las obras ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}.`,
                           });
                               }
                 
@@ -357,7 +366,6 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                             const rubros=resultadorubros[0].rubros;
 
                             if(rubros==='indirectos'){
-
                                 const obtnerPorcIndirecto=`SELECT monto_inici, 
                                                           (monto_inici * 0.03) AS porcentaje_3
                                                           FROM presupuesto
@@ -383,7 +391,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                         sumaIndirectos:sumaIndirectos,
                                         porIndectos:porIndirectos,
                                         ok: false,
-                                        msg: `El presupuesto destinado para indirectos de Faismun no debe ser máximo del 3%, es decir, de $${porIndirectos} y el presupuesto estimado para la obra es de $${presupuesto} excede el maximo`,
+                                        msg: `El presupuesto destinado para indirectos de Faismun no debe ser máximo del 3%, es decir, de $${porIndirectos} y el presupuesto estimado para la obra es de $${presupuesto}  sumado a los $${sumaIndirectos} excede el maximo`,
                                     });
                                 }
 
@@ -441,7 +449,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                         sumaProdim:sumaProdim,
                                         porProdim:porProdim,
                                         ok: false,
-                                        msg: `El presupuesto destinado para prodim de Faismun no debe ser máximo del 2%, es decir, de $${porProdim} y el presupuesto estimado para la obra es de $${presupuesto} excede el maximo`,
+                                        msg: `El presupuesto destinado para prodim de Faismun no debe ser máximo del 2%, es decir, de $${porProdim} y el presupuesto estimado para la obra es de $${presupuesto} sumado a los $${sumaProdim} ya existentes excede el maximo `,
                                     });
                                 }
 
@@ -500,13 +508,6 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                             
                                 // Calcular cuánto falta para completar el 5% total (indirectos + prodim)
                                 const montoFaltanteIndirectosProdim = montoTotalIndirectosProdim - (sumaIndirectos + sumaProdim);
-                                
-                                const montoRestanteConsulta = await ejecutarConsulta(`
-                                    SELECT monto_rest 
-                                    FROM presupuesto 
-                                    WHERE idPresupuesto = ?`, [idpresupuesto]);
-
-                                const montoRestantePresupuesto=montoRestanteConsulta[0].monto_rest;
 
                                 // Si falta algún monto para completar el 5%, validamos que no se afecte
                                 if (montoFaltanteIndirectosProdim > 0) {
@@ -533,7 +534,44 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                         }
                                     }
                                 }
-                            
+
+                                //===========================================================================
+
+                                // Calcular el 40% del monto inicial
+                                const montoZonaDirectaMinimo = montoInicial * 0.4;
+
+                                const obtenerSumaZonaDirecta = `
+                                    SELECT 
+                                        COALESCE(SUM(CASE 
+                                            WHEN rubros IN ('zona_atencion_prioritaria', 'incidencia_directa') 
+                                            THEN presupuesto 
+                                            ELSE 0 
+                                        END), 0) AS suma_zona_directa
+                                    FROM obra
+                                    WHERE presupuesto_idPresupuesto = ?
+                                    AND idobra != ?`;
+
+                                    const resultadoSumaZonaDirecta = await ejecutarConsulta(obtenerSumaZonaDirecta, [idpresupuesto, idobra]);
+                                    const sumaZonaDirecta = resultadoSumaZonaDirecta[0].suma_zona_directa;
+
+                                    // Calcular cuánto falta para completar el 40% mínimo
+                                    const montoFaltanteZonaDirecta = montoZonaDirectaMinimo - sumaZonaDirecta;
+
+                                    if (montoFaltanteZonaDirecta > 0) {
+                                        // Si la obra no es de indirectos ni prodim
+                                        if (rubros !== 'zona_atencion_prioritaria' && rubros !== 'incidencia_directa') {
+                                            if (presupuesto > montoRestaurado - montoFaltanteZonaDirecta) {
+                                                return res.status(401).json({
+                                                    presupuesto: presupuesto,
+                                                    montoFaltante: montoFaltanteZonaDirecta,
+                                                    ok: false,
+                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para ZAP a Incidencia directa. Queda pendiente un monto de $${montoFaltanteZonaDirecta}.`,
+                                                });
+                                            }
+                                        }
+                                    }
+                          
+                                                            
                                 // Si no hay problema con el monto faltante, se procede con la actualización
                                 const presuEstatal = `
                                     UPDATE obra
@@ -558,7 +596,8 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                     mensaje: "Presupuesto actualizado correctamente",
                                     presupuesto: presupuesto,
                                     rubros: rubros,
-                                    montoFaltante: montoFaltanteIndirectosProdim,
+                                    montoFaltanteDeProdimIndirectos: montoFaltanteIndirectosProdim,
+                                    montoFaltantedeZapIncidencia:montoFaltanteZonaDirecta 
                                 };
                             }
                         } else if (prodim === 0 && indirectos === 0) {
