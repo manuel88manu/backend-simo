@@ -8,12 +8,17 @@ const {check}=require('express-validator')
 const router=Router();
 const { validarCampos } = require('../middlewares/validar-campos');
 const {validarJWT}=require('../middlewares/validar-jwt');
-const { agregarObra, agregarConcepto, agregarPartida, actualizarPresupuesto } = require('../controllers/obra');
+const { agregarObra, agregarConcepto, agregarPartida, actualizarPresupuesto, obtenerPartidasAgregadas } = require('../controllers/obra');
+const { validarNuevaObra } = require('../middlewares/validar-nuevaobra-js');
+const { validarNuevaObrayDicatamen } = require('../middlewares/validar-nuevaobra-js');
 
 
 
 router.post(
-    '/newobra',agregarObra
+    '/newobra',[
+        validarNuevaObrayDicatamen,
+        validarCampos
+    ],agregarObra
 
 )
 
@@ -30,5 +35,8 @@ router.put(
     '/updatapresu/:idobra',actualizarPresupuesto
 )
 
+router.get(
+    '/addpartidas',obtenerPartidasAgregadas
+)
 
 module.exports=router;

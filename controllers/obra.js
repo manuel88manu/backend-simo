@@ -81,9 +81,18 @@ const agregarObra = async (req, res = express.response) => {
         const actualizarObraQuery = `UPDATE obra SET dictamen_iddictamen = ? WHERE idobra = ?`;
         await ejecutarConsulta(actualizarObraQuery, [dictamenId, obraId]);
 
+        const obraCreada= await ejecutarConsulta(`select *from obra where idobra=?`,[obraId])
+        const obraResult=obraCreada[0]
+
+        const dictamenCreado= await ejecutarConsulta(`select *from dictamen where iddictamen=?`,[dictamenId])
+        const dictamenResult=dictamenCreado[0]
+
         return res.status(200).json({
             ok: true,
             msg: 'Obra y dictamen creados exitosamente',
+            obra:obraResult,
+            dictamen:dictamenResult
+
         });
 
     } catch (error) {
@@ -1167,9 +1176,51 @@ const actualizarPresupuesto = async (req, res = express.response) => {
     }
 };
 
+const obtenerPartidasAgregadas = async (req, res = express.response) => {
+    try {
+        const { idobra } = req.query;
+        
+        const obraexist= await ejecutarConsulta(`select * from obra where idobra=?`,[idobra])
+   
+        if(obraexist.length===0){
+            return res.status(401).json({
+                ok: false,
+                msg:'La obra donde se quiere agregar la partida no existe'
+            });
+        }
+
+        const partidas= await ejecutarConsulta(`select idpartida,nombre_par,monto_tot from partida where obra_idobra = ?`,[idobra])
+        
+        if(partidas.length===0){
+            return res.status(200).json({
+                ok: true,
+                partidas:[],
+                msg: 'Todo Bien',
+            });
+
+        }
+
+        return res.status(200).json({
+            ok: true,
+            partidas:partidas,
+            msg: 'Todo Bien',
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            ok: false,
+            msg: 'Algo salió mal.',
+            error: error.message,
+        });
+    }
+
+}
+
 module.exports = {
     agregarObra,
     agregarPartida,
     agregarConcepto,
-    actualizarPresupuesto
+    actualizarPresupuesto,
+    obtenerPartidasAgregadas
 };
