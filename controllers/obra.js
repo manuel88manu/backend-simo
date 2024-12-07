@@ -1217,10 +1217,51 @@ const obtenerPartidasAgregadas = async (req, res = express.response) => {
 
 }
 
+const obtenerConceptos=async (req, res = express.response) => {
+    try {
+
+        const { idpartida } = req.query;
+
+        const partiExiste= await ejecutarConsulta(`select * from partida where idpartida=?`,[idpartida])
+
+        if(partiExiste.length===0){
+            return res.status(401).json({
+                ok: false,
+                msg:'El periodo donde se quiere agregar el concepto no existe'
+            });
+        }
+
+        const conceptos= await ejecutarConsulta('select idconcepto, nombre_conc, monto from concepto where partida_idpartida=?',[idpartida])
+
+        if(conceptos.length===0){
+            return res.status(200).json({
+                ok: true,
+                conceptos:[],
+                msg: 'Todo Bien',
+            });
+        }
+
+        return res.status(200).json({
+            ok: true,
+            msg: 'Todo Bien',
+            conceptos:conceptos
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            ok: false,
+            msg: 'Algo salió mal.',
+            error: error.message,
+        });
+    }
+}
+
 module.exports = {
     agregarObra,
     agregarPartida,
     agregarConcepto,
     actualizarPresupuesto,
-    obtenerPartidasAgregadas
+    obtenerPartidasAgregadas,
+    obtenerConceptos
 };
