@@ -274,6 +274,16 @@ const actualizarPresupuesto = async (req, res = express.response) => {
             });
         }
 
+        const partidasNullas= await ejecutarConsulta(`SELECT * 
+                                                        FROM partida 
+                                                        WHERE obra_idobra = ? AND monto_tot IS NULL;`,[idobra])
+        if(partidasNullas.length>0){
+            return res.status(404).json({
+                ok: false,
+                msg: 'Existen partidas que no se han agregado conceptos, favor de agregarlos',
+            });
+        }
+
         const presupuesto = resulPresupuestoFinal[0].presupuesto_total;
         const iva = resulPresupuestoFinal[0].iva;
 
