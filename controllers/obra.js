@@ -62,6 +62,8 @@ const agregarObra = async (req, res = express.response) => {
             });
         }
 
+        dictamen.obra_idobra=obraId;
+
         // Insertar el dictamen en la tabla dictamen
         const columnasDictamen = Object.keys(dictamen); // Obtener las columnas del objeto "dictamen"
         const valoresDictamen = Object.values(dictamen); // Obtener los valores del objeto "dictamen"
@@ -77,9 +79,6 @@ const agregarObra = async (req, res = express.response) => {
         // Obtener el ID del dictamen recién insertado
         const dictamenId = resultadoDictamen.insertId;
 
-        // Actualizar la obra con el ID del dictamen
-        const actualizarObraQuery = `UPDATE obra SET dictamen_iddictamen = ? WHERE idobra = ?`;
-        await ejecutarConsulta(actualizarObraQuery, [dictamenId, obraId]);
 
         const obraCreada= await ejecutarConsulta(`select *from obra where idobra=?`,[obraId])
         const obraResult=obraCreada[0]
@@ -1241,7 +1240,7 @@ const obtenerConceptos=async (req, res = express.response) => {
             });
         }
 
-        const conceptos= await ejecutarConsulta('select idconcepto, nombre_conc, monto from concepto where partida_idpartida=?',[idpartida])
+        const conceptos= await ejecutarConsulta('select idconcepto, nombre_conc, monto, partida_idpartida from concepto where partida_idpartida=?',[idpartida])
 
         if(conceptos.length===0){
             return res.status(200).json({
@@ -1267,11 +1266,83 @@ const obtenerConceptos=async (req, res = express.response) => {
     }
 }
 
+const actualizarConcepto=async (req, res = express.response) => {
+try {
+    
+    const { concepto} = req.body;
+
+    const idConcepto= await ejecutarConsulta(`select * from
+                                              concepto where idconcepto=?
+                                              `,[concepto.idconcepto])
+    if(idConcepto.length===0){
+        return res.status(401).json({
+            ok: false,
+            msg: `El concepto que se quiere actualizar no existe`,
+        });
+    }
+
+
+    const conceptoExiste= await ejecutarConsulta(`select *
+                                                  from concepto 
+                                                  where nombre_conc=? and idconcepto != ?`,
+                                                  [concepto.nombre_conc,concepto.idconcepto]
+                                                )
+    if(conceptoExiste.length>0){
+        return res.status(401).json({
+            ok: false,
+            msg: `El concepto llamado ${concepto.nombre_conc} ya existe en un concepto diferente`,
+        });
+    }
+
+    await ejecutarConsulta(`UPDATE concepto
+        SET
+             unidad = ?,
+             p_unitario = ?,
+             cantidad = ?,
+             nombre_conc = ?
+             WHERE idconcepto = ?`,[
+                concepto.unidad,concepto.p_unitario,concepto.cantidad,
+                concepto.nombre_conc,concepto.idconcepto
+            ])
+    
+            const obtenerMonto=`UPDATE concepto
+            SET monto = cantidad * p_unitario
+            WHERE idconcepto = ?;`
+
+            await ejecutarConsulta(obtenerMonto,[concepto.idconcepto])
+
+            const obtenerMontoPartida= `UPDATE partida p
+            SET monto_tot = (
+                 SELECT SUM(c.monto)
+                 FROM concepto c
+                 WHERE c.partida_idpartida = p.idpartida
+                )
+            WHERE p.idpartida = ?`
+
+            await ejecutarConsulta (obtenerMontoPartida,[concepto.partida_idpartida])
+
+    return res.status(200).json({
+        ok: true,
+        msg: 'Todo Bien',
+    });
+} catch (error) {
+    console.error(error);
+        return res.status(500).json({
+            ok: false,
+            msg: 'Algo salió mal.',
+            error: error.message,
+        });
+}
+
+
+}
+
 module.exports = {
     agregarObra,
     agregarPartida,
     agregarConcepto,
     actualizarPresupuesto,
     obtenerPartidasAgregadas,
-    obtenerConceptos
+    obtenerConceptos,
+    actualizarConcepto
 };
