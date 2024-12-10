@@ -1240,7 +1240,7 @@ const obtenerConceptos=async (req, res = express.response) => {
             });
         }
 
-        const conceptos= await ejecutarConsulta('select idconcepto, nombre_conc, monto, partida_idpartida from concepto where partida_idpartida=?',[idpartida])
+        const conceptos= await ejecutarConsulta('select idconcepto, nombre_conc, monto, partida_idpartida, unidad, p_unitario, cantidad from concepto where partida_idpartida=?',[idpartida])
 
         if(conceptos.length===0){
             return res.status(200).json({
@@ -1337,6 +1337,54 @@ try {
 
 }
 
+const actualizarPartida=async (req, res = express.response) => {
+    try {
+        const {partida}= req.body
+
+        const partidaId= await  ejecutarConsulta(
+            `select * from partida where idpartida=?`,[partida.idpartida]
+        )
+
+        if(partidaId.length===0){
+            return res.status(401).json({
+                ok: false,
+                msg:'La partida que se quiere actualizar no existe'
+            });
+        }
+
+        const partidaExiste= await ejecutarConsulta(
+            `select * from partida where nombre_par=? and idpartida !=?
+             `
+            ,[partida.nombre_par,partida.idpartida])
+        
+        if(partidaExiste.length>0){
+            return res.status(401).json({
+                ok: false,
+                msg:`Ya existe una partida diferente con el nombre ${partida.nombre_par} no es posible actualizar`
+            });
+        }
+
+        await ejecutarConsulta(
+           `UPDATE partida SET nombre_par = ? 
+            WHERE idpartida=?`,[partida.nombre_par,partida.idpartida]
+        )
+        
+        return res.status(200).json({
+            ok: true,
+            msg: 'Todo Bien',
+            
+        });
+        
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            ok: false,
+            msg: 'Algo salió mal.',
+            error: error.message,
+        });
+    }
+}
+
 module.exports = {
     agregarObra,
     agregarPartida,
@@ -1344,5 +1392,6 @@ module.exports = {
     actualizarPresupuesto,
     obtenerPartidasAgregadas,
     obtenerConceptos,
-    actualizarConcepto
+    actualizarConcepto,
+    actualizarPartida
 };
