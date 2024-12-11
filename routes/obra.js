@@ -8,7 +8,7 @@ const {check}=require('express-validator')
 const router=Router();
 const { validarCampos } = require('../middlewares/validar-campos');
 const {validarJWT}=require('../middlewares/validar-jwt');
-const { agregarObra, agregarConcepto, agregarPartida, actualizarPresupuesto, obtenerPartidasAgregadas, obtenerConceptos, actualizarConcepto, actualizarPartida } = require('../controllers/obra');
+const { agregarObra, agregarConcepto, agregarPartida, actualizarPresupuesto, obtenerPartidasAgregadas, obtenerConceptos, actualizarConcepto, actualizarPartida, eliminarConcepto } = require('../controllers/obra');
 const { validarNuevaObra } = require('../middlewares/validar-nuevaobra-js');
 const { validarNuevaObrayDicatamen } = require('../middlewares/validar-nuevaobra-js');
 
@@ -106,6 +106,10 @@ router.put(
         .isString().withMessage('El nombre debe ser un texto'),
         validarCampos
     ],actualizarPartida
+)
+
+router.delete(
+    '/deleteconcep/:idconcepto',eliminarConcepto
 )
 
 module.exports=router;

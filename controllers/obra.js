@@ -1385,6 +1385,56 @@ const actualizarPartida=async (req, res = express.response) => {
     }
 }
 
+const eliminarConcepto=async(req, res = express.response) => {
+try {
+    const {idconcepto}=req.params
+    const conceptoId= await ejecutarConsulta(`select * from concepto where idconcepto=?`,
+                                            [idconcepto]
+    )
+
+    if(conceptoId.length===0){
+        return res.status(401).json({
+            ok: false,
+            msg:`El concepto que quiere eliminar no existe en la base de datos`
+        });
+    }
+
+    const idpartidaresul= await ejecutarConsulta(`select partida_idpartida from concepto where idconcepto=?`
+                                             ,[idconcepto]              
+    )
+
+    const idpartida=idpartidaresul[0].partida_idpartida
+
+    await ejecutarConsulta(`delete from concepto where idconcepto=?`
+                                            , [idconcepto]
+    )
+
+    const obtenerMontoPartida= `UPDATE partida p
+    SET monto_tot = (
+         SELECT SUM(c.monto)
+         FROM concepto c
+         WHERE c.partida_idpartida = p.idpartida
+        )
+    WHERE p.idpartida = ?`
+
+    await ejecutarConsulta (obtenerMontoPartida,[idpartida])
+
+    return res.status(200).json({
+        ok: true,
+        msg: 'Todo Bien',
+        
+    });
+} catch (error) {
+    console.error(error);
+    return res.status(500).json({
+        ok: false,
+        msg: 'Algo salió malaaaa.',
+        error: error.message,
+    });
+}
+}
+
+
 module.exports = {
     agregarObra,
     agregarPartida,
@@ -1393,5 +1443,6 @@ module.exports = {
     obtenerPartidasAgregadas,
     obtenerConceptos,
     actualizarConcepto,
-    actualizarPartida
+    actualizarPartida,
+    eliminarConcepto,
 };
