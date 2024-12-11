@@ -243,6 +243,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
             return res.status(401).json({
                 ok: false,
                 msg: 'El id de la Obra no existe en la base de datos',
+                comun:true
             });
         }
 
@@ -270,6 +271,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
             return res.status(404).json({
                 ok: false,
                 msg: 'No se encontraron partidas para esta obra.',
+                comun:true
             });
         }
 
@@ -280,6 +282,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
             return res.status(404).json({
                 ok: false,
                 msg: 'Existen partidas que no se han agregado conceptos, favor de agregarlos',
+                comun:true
             });
         }
 
@@ -1188,13 +1191,21 @@ const actualizarPresupuesto = async (req, res = express.response) => {
 const obtenerPartidasAgregadas = async (req, res = express.response) => {
     try {
         const { idobra } = req.query;
-        
+
+        if (idobra == null || idobra === '') {
+            return res.status(200).json({
+                ok: true,
+                partidas: [],
+                msg: 'Todo bien, pero no se recibió un idobra válido.',
+            });
+        }
+
         const obraexist= await ejecutarConsulta(`select * from obra where idobra=?`,[idobra])
    
         if(obraexist.length===0){
             return res.status(401).json({
                 ok: false,
-                msg:'La obra donde se quiere agregar la partida no existe'
+                msg:'La obra donde se quiere agregar la partida no existe',
             });
         }
 
@@ -1459,6 +1470,37 @@ try {
 }
 }
 
+const eliminarObra=async(req, res = express.response) => {
+ try {
+
+    const {idobra}=req.params
+
+    const obraExiste= await ejecutarConsulta(`select * from obra where idobra=?`,
+                                            [idobra]
+    )
+
+    if(obraExiste===0){
+        return res.status(401).json({
+            ok: false,
+            msg:`La obra que quiere eliminar no existe en la base de datos`
+        });
+    }
+
+    await ejecutarConsulta(`delete from obra where idobra=?`,[idobra])
+
+    return res.status(200).json({
+        ok: true,
+        msg: 'Todo Bien',
+    });
+ } catch (error) {
+    return res.status(500).json({
+        ok: false,
+        msg: 'Algo salió mal.',
+        error: error.message,
+    });
+ }
+}
+
 module.exports = {
     agregarObra,
     agregarPartida,
@@ -1469,5 +1511,6 @@ module.exports = {
     actualizarConcepto,
     actualizarPartida,
     eliminarConcepto,
-    eliminarPartida
+    eliminarPartida,
+    eliminarObra
 };
