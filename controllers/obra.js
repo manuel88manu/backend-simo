@@ -1198,7 +1198,7 @@ const obtenerPartidasAgregadas = async (req, res = express.response) => {
             });
         }
 
-        const partidas= await ejecutarConsulta(`select idpartida,nombre_par,monto_tot from partida where obra_idobra = ?`,[idobra])
+        const partidas= await ejecutarConsulta(`select idpartida,nombre_par,monto_tot,obra_idobra from partida where obra_idobra = ?`,[idobra])
         
         if(partidas.length===0){
             return res.status(200).json({
@@ -1230,15 +1230,6 @@ const obtenerConceptos=async (req, res = express.response) => {
     try {
 
         const { idpartida } = req.query;
-
-        const partiExiste= await ejecutarConsulta(`select * from partida where idpartida=?`,[idpartida])
-
-        if(partiExiste.length===0){
-            return res.status(401).json({
-                ok: false,
-                msg:'El periodo donde se quiere agregar el concepto no existe'
-            });
-        }
 
         const conceptos= await ejecutarConsulta('select idconcepto, nombre_conc, monto, partida_idpartida, unidad, p_unitario, cantidad from concepto where partida_idpartida=?',[idpartida])
 
@@ -1284,13 +1275,13 @@ try {
 
     const conceptoExiste= await ejecutarConsulta(`select *
                                                   from concepto 
-                                                  where nombre_conc=? and idconcepto != ?`,
-                                                  [concepto.nombre_conc,concepto.idconcepto]
+                                                  where nombre_conc=? and idconcepto != ? and partida_idpartida=?` ,
+                                                  [concepto.nombre_conc,concepto.idconcepto,concepto.partida_idpartida]
                                                 )
     if(conceptoExiste.length>0){
         return res.status(401).json({
             ok: false,
-            msg: `El concepto llamado ${concepto.nombre_conc} ya existe en un concepto diferente`,
+            msg: `El concepto llamado ${concepto.nombre_conc} ya existe en un registro diferente`,
         });
     }
 
@@ -1353,9 +1344,9 @@ const actualizarPartida=async (req, res = express.response) => {
         }
 
         const partidaExiste= await ejecutarConsulta(
-            `select * from partida where nombre_par=? and idpartida !=?
+            `select * from partida where nombre_par=? and idpartida !=? and obra_idobra=?
              `
-            ,[partida.nombre_par,partida.idpartida])
+            ,[partida.nombre_par,partida.idpartida,partida.obra_idobra])
         
         if(partidaExiste.length>0){
             return res.status(401).json({
@@ -1434,6 +1425,39 @@ try {
 }
 }
 
+const eliminarPartida=async(req, res = express.response) => {
+try {
+    const {idpartida}=req.params
+
+    const partidaExist= await ejecutarConsulta(`select *from partida where idpartida=?`
+                                                ,  [idpartida]
+    )
+
+    if(partidaExist.length===0){
+        return res.status(401).json({
+            ok: false,
+            msg:`La partida que se quiere eliminar no existe`
+        });
+    }
+
+    await ejecutarConsulta(`delete from partida where idpartida=?`,
+                                        [idpartida]
+    )
+
+    return res.status(200).json({
+        ok: true,
+        msg: 'Todo Bien',
+        
+    });
+} catch (error) {
+    console.error(error);
+    return res.status(500).json({
+        ok: false,
+        msg: 'Algo salió malaaaa.',
+        error: error.message,
+    });
+}
+}
 
 module.exports = {
     agregarObra,
@@ -1445,4 +1469,5 @@ module.exports = {
     actualizarConcepto,
     actualizarPartida,
     eliminarConcepto,
+    eliminarPartida
 };
