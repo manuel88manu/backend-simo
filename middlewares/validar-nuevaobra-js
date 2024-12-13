@@ -45,6 +45,12 @@ const validarNuevaObrayDicatamen = [
         .notEmpty().withMessage('La localidad o colonia es obligatoria')
         .isString().withMessage('La localidad o colonia debe ser un texto'),
 
+  check('obra.num_obra')
+  .trim()
+  .notEmpty().withMessage('El número de obra es obligatorio')
+  .isString().withMessage('El número de obra debe ser un texto')
+  .matches(/^\d+\/\d+-[P|C][R|P]$/).withMessage('El número de obra debe tener el formato correcto (ej. 24/456-PR o 25/012-CP)'),
+        
             // Validaciones para el objeto "dictamen"
             check('dictamen.situacion')
             .notEmpty().withMessage('La situación es obligatoria')

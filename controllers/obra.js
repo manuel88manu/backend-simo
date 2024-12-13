@@ -1,12 +1,14 @@
 const express = require('express');
 const { ejecutarConsulta } = require('../database/config');
 
+//const fechaHoy = new Date('2024-12-30T00:00:00Z'); //Prueba
+
 const agregarObra = async (req, res = express.response) => {
     try {
         const { Presupuesto_idPresupuesto, obra, dictamen } = req.body;
 
         // Verificar si el presupuesto existe
-        const PresupuestoExiste = `SELECT * FROM presupuesto WHERE idpresupuesto = ?`;
+        const PresupuestoExiste = `SELECT tipo FROM presupuesto WHERE idpresupuesto = ?`;
         const resultadoPresupuesto = await ejecutarConsulta(PresupuestoExiste, [Presupuesto_idPresupuesto]);
 
         if (resultadoPresupuesto.length === 0) {
@@ -17,13 +19,9 @@ const agregarObra = async (req, res = express.response) => {
         }
 
         // Validar si la obra ya existe con el mismo nombre y otros atributos
-        const validacionObra = `SELECT * FROM obra WHERE nombre = ? AND bene_unidad = ? AND subprograma = ? AND programa = ? AND Presupuesto_idPresupuesto = ?`;
+        const validacionObra = `SELECT * FROM obra WHERE num_obra=?`;
         const valoresValidacion = [
-            obra.nombre,
-            obra.bene_unidad,
-            obra.subprograma,
-            obra.programa,
-            Presupuesto_idPresupuesto
+            obra.num_obra
         ];
 
         const resultadoObraExistente = await ejecutarConsulta(validacionObra, valoresValidacion);
@@ -31,8 +29,60 @@ const agregarObra = async (req, res = express.response) => {
         if (resultadoObraExistente.length > 0) {
             return res.status(400).json({
                 ok: false,
-                msg: 'La obra ya existe en la base de datos.',
+                msg:`El numero de obra: ${obra.num_obra} ya existe en la base de datos`,
             });
+        }
+
+        //------------Validar Presupuesto Fechas limites--------------------------
+
+        //Fecha y año actual 
+        const fechaHoy = new Date();
+        const añoActual = fechaHoy.getUTCFullYear(); 
+
+        //Fecha para faismun, prodim y otros
+        const fechaLimitFaismun = new Date(Date.UTC(añoActual, 10, 30)); //30 de noviembre del año actual
+        const fechaLimitProdim = new Date(Date.UTC(añoActual, 5, 30)); // 30 de junio del año actual en UTC
+        const fechaLimitOtros = new Date(Date.UTC(añoActual,11, 30)); // 30 de junio del año actual en UTC
+
+        fechaLimitFaismun.setUTCHours(23, 59, 59, 999);
+        fechaLimitProdim.setUTCHours(23, 59, 59, 999);
+        fechaLimitOtros.setUTCHours(23, 59, 59, 999);
+
+        const tipo=resultadoPresupuesto[0].tipo
+
+        switch (tipo) {
+            case 'faismun':
+                if(fechaHoy>fechaLimitFaismun){
+                    return res.status(400).json({
+                        ok: false,
+                        msg: `No es posible agregar una obra FAISMUN ya que la fecha limite es el 30 de Noviembre del presente año`,
+                    });
+                }else{
+                    if(obra.rubros==='prodim'){
+                        if(fechaHoy>fechaLimitProdim){
+                            return res.status(400).json({
+                                ok: false,
+                                msg: `No es posible agregar una obra con el Rubro de PRODIM ya que la fecha limite es el 30 de junio del presente año`,
+                            });
+                        }
+
+                    }
+
+                }
+                break;
+            case 'estatal':
+            case 'fortamun':
+            case 'odirectas':
+            case 'federal':
+                 if(fechaHoy>fechaLimitOtros){
+                    return res.status(400).json({
+                        ok: false,
+                        msg: `No es posible agregar una obra ${tipo} ya que la fecha limite es el 30 de Diciembre del presente año`,
+                    });
+                 }
+                break;
+            default:
+                break;
         }
 
         // Insertar la obra y obtener el ID generado
