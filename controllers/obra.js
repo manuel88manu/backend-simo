@@ -8,13 +8,13 @@ const agregarObra = async (req, res = express.response) => {
         const { Presupuesto_idPresupuesto, obra, dictamen } = req.body;
 
         // Verificar si el presupuesto existe
-        const PresupuestoExiste = `SELECT tipo FROM presupuesto WHERE idpresupuesto = ?`;
+        const PresupuestoExiste = `SELECT tipo FROM presupuesto WHERE idPresupuesto = ?`;
         const resultadoPresupuesto = await ejecutarConsulta(PresupuestoExiste, [Presupuesto_idPresupuesto]);
 
         if (resultadoPresupuesto.length === 0) {
             return res.status(401).json({
                 ok: false,
-                msg: 'El presupuesto asignado no existe',
+                msg:'El presupuesto asignado no existe',
             });
         }
 
@@ -36,7 +36,8 @@ const agregarObra = async (req, res = express.response) => {
         //------------Validar Presupuesto Fechas limites--------------------------
 
         //Fecha y año actual 
-        const fechaHoy = new Date();
+        const fechaHoy = new Date('2024-01-30T00:00:00Z'); //Prueba
+        //const fechaHoy = new Date();
         const añoActual = fechaHoy.getUTCFullYear(); 
 
         //Fecha para faismun, prodim y otros

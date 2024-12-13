@@ -5,7 +5,7 @@
 
 const {Router}=require('express')
 const {check, body}=require('express-validator');
-const { buscarPeriodo, crearPeriodo, obtenerPeriodos } = require('../controllers/periodo');
+const { buscarPeriodo, crearPeriodo, obtenerPeriodos, obtenerFaltante } = require('../controllers/periodo');
 const { validarCampos } = require('../middlewares/validar-campos');
 const router=Router();
 
@@ -27,5 +27,7 @@ router.post('/newper',[
 ],crearPeriodo)
 
 router.get('/presupuestos',obtenerPeriodos)
+
+router.get('/faltante',obtenerFaltante)
 
 module.exports=router;

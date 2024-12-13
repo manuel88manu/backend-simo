@@ -198,8 +198,306 @@ const obtenerPeriodos = async (req, res = express.response) => {
     }
 };
 
+const obtenerFaltante=async (req, res = express.response) => { 
+    try {
+        const{idPresupuesto}=req.query
+        
+        const presuExiste= await ejecutarConsulta(`select 
+                                        tipo,prodim,indirectos,monto_inici,monto_rest 
+                                        from presupuesto where idPresupuesto=?`,
+                                        [idPresupuesto]
+        )
+
+        if(presuExiste.length===0){
+            return res.status(400).json({
+                ok: false,
+                msg: 'No existe el presupuesto que se busca',
+            });
+        }
+
+        const tipo=presuExiste[0].tipo
+        const prodim=presuExiste[0].prodim
+        const indirectos=presuExiste[0].indirectos
+        const monto_inici=presuExiste[0].monto_inici
+        const monto_rest=presuExiste[0].monto_rest
+
+        let montosFalt={}
+       
+        switch (tipo) {
+            case 'faismun':
+                try {
+                if(prodim===1 && indirectos==1){
+
+                    //-------------indirectos montos------------------------------
+                    const obtnerPorcIndirecto=`SELECT monto_inici, 
+                    (monto_inici * 0.03) AS porcentaje_3
+                    FROM presupuesto
+                    WHERE idPresupuesto = ?;`
+                    const resultPorIndirecto= await ejecutarConsulta(obtnerPorcIndirecto,[idPresupuesto])
+                    const porindirecto=resultPorIndirecto[0].porcentaje_3
+
+                    const obtenerSumaIndirectos=`SELECT COALESCE(SUM(presupuesto), 0) 
+                                                             AS suma_presupuesto
+                                                             FROM obra
+                                                             WHERE presupuesto_idPresupuesto = ?
+                                                             AND rubros = 'indirectos'
+                                                             `
+
+                    const sumaIndirectosResult= await ejecutarConsulta(obtenerSumaIndirectos,[idPresupuesto])
+                    const restIndirectos=porindirecto-(sumaIndirectosResult[0].suma_presupuesto);
+
+                    //------------prodim montos-----------------------------------------------
+                    const obtnerPorcProdim=`SELECT monto_inici, 
+                    (monto_inici * 0.02) AS porcentaje_2
+                    FROM presupuesto
+                    WHERE idPresupuesto = ?;`
+
+                    const resultPorProdim= await ejecutarConsulta(obtnerPorcProdim,[idPresupuesto])
+                    const porProdim= resultPorProdim[0].porcentaje_2;
+
+                    const obtenerSumaProdim=`SELECT COALESCE(SUM(presupuesto), 0) 
+                                                             AS suma_presupuesto
+                                                             FROM obra
+                                                             WHERE presupuesto_idPresupuesto = ?
+                                                             AND rubros = 'prodim'
+                                                             `
+
+                    const sumaProdimResult= await ejecutarConsulta(obtenerSumaProdim,[idPresupuesto])
+                    const resProdim=porProdim-(sumaProdimResult[0].suma_presupuesto);
+
+                    const montoZonaDirectaMinimo = monto_inici * 0.4;
+
+                                const obtenerSumaZonaDirecta = `
+                                    SELECT 
+                                        COALESCE(SUM(CASE 
+                                            WHEN rubros IN ('zona_atencion_prioritaria', 'incidencia_directa') 
+                                            THEN presupuesto 
+                                            ELSE 0 
+                                        END), 0) AS suma_zona_directa
+                                    FROM obra
+                                    WHERE presupuesto_idPresupuesto = ?`;
+                 const resultadoSumaZonaDirecta = await ejecutarConsulta(obtenerSumaZonaDirecta, [idPresupuesto]);
+                 const resZonaDirecta =montoZonaDirectaMinimo-(resultadoSumaZonaDirecta[0].suma_zona_directa);
+
+                    montosFalt={
+                        monto_indirectos:porindirecto,
+                        monto_indirectos_falt:restIndirectos,
+
+                        monto_prodim:porProdim,
+                        monto_prodim_falt:resProdim,
+
+                        monto_zap_indirecto:montoZonaDirectaMinimo,
+                        monto_zap_indirecto_falt:resZonaDirecta,
+
+                        monto_restante:monto_rest,
+
+                    }
+
+                }else if(prodim===1 && indirectos==0){
+
+                    //------------prodim montos-----------------------------------------------
+                    const obtnerPorcProdim=`SELECT monto_inici, 
+                    (monto_inici * 0.02) AS porcentaje_2
+                    FROM presupuesto
+                    WHERE idPresupuesto = ?;`
+
+                    const resultPorProdim= await ejecutarConsulta(obtnerPorcProdim,[idPresupuesto])
+                    const porProdim= resultPorProdim[0].porcentaje_2;
+
+                    const obtenerSumaProdim=`SELECT COALESCE(SUM(presupuesto), 0) 
+                                                             AS suma_presupuesto
+                                                             FROM obra
+                                                             WHERE presupuesto_idPresupuesto = ?
+                                                             AND rubros = 'prodim'
+                                                             `
+
+                    const sumaProdimResult= await ejecutarConsulta(obtenerSumaProdim,[idPresupuesto])
+                    const resProdim=porProdim-(sumaProdimResult[0].suma_presupuesto);
+
+                    const montoZonaDirectaMinimo = monto_inici * 0.4;
+
+                                const obtenerSumaZonaDirecta = `
+                                    SELECT 
+                                        COALESCE(SUM(CASE 
+                                            WHEN rubros IN ('zona_atencion_prioritaria', 'incidencia_directa') 
+                                            THEN presupuesto 
+                                            ELSE 0 
+                                        END), 0) AS suma_zona_directa
+                                    FROM obra
+                                    WHERE presupuesto_idPresupuesto = ?`;
+                 const resultadoSumaZonaDirecta = await ejecutarConsulta(obtenerSumaZonaDirecta, [idPresupuesto]);
+                 const resZonaDirecta =montoZonaDirectaMinimo-(resultadoSumaZonaDirecta[0].suma_zona_directa);
+
+                    montosFalt={
+                        monto_prodim:porProdim,
+                        monto_prodim_falt:resProdim,
+
+                        monto_zap_indirecto:montoZonaDirectaMinimo,
+                        monto_zap_indirecto_falt:resZonaDirecta,
+
+                        monto_restante:monto_rest,
+
+                    }
+
+                }else if(prodim===0 && indirectos==1){
+
+                    //-------------indirectos montos------------------------------
+                    const obtnerPorcIndirecto=`SELECT monto_inici, 
+                    (monto_inici * 0.03) AS porcentaje_3
+                    FROM presupuesto
+                    WHERE idPresupuesto = ?;`
+                    const resultPorIndirecto= await ejecutarConsulta(obtnerPorcIndirecto,[idPresupuesto])
+                    const porindirecto=resultPorIndirecto[0].porcentaje_3
+
+                    const obtenerSumaIndirectos=`SELECT COALESCE(SUM(presupuesto), 0) 
+                                                             AS suma_presupuesto
+                                                             FROM obra
+                                                             WHERE presupuesto_idPresupuesto = ?
+                                                             AND rubros = 'indirectos'
+                                                             `
+
+                    const sumaIndirectosResult= await ejecutarConsulta(obtenerSumaIndirectos,[idPresupuesto])
+                    const restIndirectos=porindirecto-(sumaIndirectosResult[0].suma_presupuesto);
+
+                    const montoZonaDirectaMinimo = monto_inici * 0.4;
+
+                                const obtenerSumaZonaDirecta = `
+                                    SELECT 
+                                        COALESCE(SUM(CASE 
+                                            WHEN rubros IN ('zona_atencion_prioritaria', 'incidencia_directa') 
+                                            THEN presupuesto 
+                                            ELSE 0 
+                                        END), 0) AS suma_zona_directa
+                                    FROM obra
+                                    WHERE presupuesto_idPresupuesto = ?`;
+                 const resultadoSumaZonaDirecta = await ejecutarConsulta(obtenerSumaZonaDirecta, [idPresupuesto]);
+                 const resZonaDirecta =montoZonaDirectaMinimo-(resultadoSumaZonaDirecta[0].suma_zona_directa);
+
+                    montosFalt={
+                        monto_indirectos:porindirecto,
+                        monto_indirectos_falt:restIndirectos,
+
+                        monto_zap_indirecto:montoZonaDirectaMinimo,
+                        monto_zap_indirecto_falt:resZonaDirecta,
+
+                        monto_restante:monto_rest,
+
+                    }
+
+                }else if(prodim===0 && indirectos===0){
+
+                    const montoZonaDirectaMinimo = monto_inici * 0.4;
+
+                                const obtenerSumaZonaDirecta = `
+                                    SELECT 
+                                        COALESCE(SUM(CASE 
+                                            WHEN rubros IN ('zona_atencion_prioritaria', 'incidencia_directa') 
+                                            THEN presupuesto 
+                                            ELSE 0 
+                                        END), 0) AS suma_zona_directa
+                                    FROM obra
+                                    WHERE presupuesto_idPresupuesto = ?`;
+                 const resultadoSumaZonaDirecta = await ejecutarConsulta(obtenerSumaZonaDirecta, [idPresupuesto]);
+                 const resZonaDirecta =montoZonaDirectaMinimo-(resultadoSumaZonaDirecta[0].suma_zona_directa);
+
+                    montosFalt={
+                        monto_zap_indirecto:montoZonaDirectaMinimo,
+                        monto_zap_indirecto_falt:resZonaDirecta,
+
+                        monto_restante:monto_rest,
+
+                    }
+                }else{
+                    montosFalt = {
+                        mensaje: "Condiciones no esperadas",
+                        prodim: prodim,
+                        indirectos: indirectos,
+                    };
+
+                }
+            } catch (error) {
+                console.error(error);
+                return res.status(500).json({
+                    ok: false,
+                    msg: 'Algo salió mal.',
+                    error: error.message,
+                });    
+            }
+                break;
+
+            case 'fortamun':
+                try {
+                    
+                    const montoSeguridaadPublica = monto_inici * 0.2;
+                    
+                    const obtenerSumaSeguriPubli = `
+                                    SELECT 
+                                        COALESCE(SUM(CASE 
+                                            WHEN rubros IN ('seguridad_publica') 
+                                            THEN presupuesto 
+                                            ELSE 0 
+                                        END), 0) AS suma_seguri_publi
+                                    FROM obra
+                                    WHERE presupuesto_idPresupuesto = ?`;
+
+                    const resultadoSumaSeguriPubli = await ejecutarConsulta(obtenerSumaSeguriPubli, [idPresupuesto]);
+                    const seguridadPublirest=montoSeguridaadPublica-(resultadoSumaSeguriPubli[0].suma_seguri_publi);
+                    
+                    montosFalt={
+                        monto_seguridad:montoSeguridaadPublica,
+                        monto_seguridad_falt:seguridadPublirest,
+                        monto_restante:monto_rest,
+
+                    }            
+                } catch (error) {
+                    console.error(error);
+                    return res.status(500).json({
+                        ok: false,
+                        msg: 'Algo salió mal.',
+                        error: error.message,
+                    });    
+                }
+            break;
+
+            case 'estatal':
+            case 'odirectas':
+            case 'federal':
+                try {
+                    montosFalt={
+                        monto_restante:monto_rest,
+                    }             
+                } catch (error) {
+                    console.error(error);
+                    return res.status(500).json({
+                        ok: false,
+                        msg: 'Algo salió mal.',
+                        error: error.message,
+                    });   
+                }
+
+            break;
+
+            default:
+                break;
+        }
+
+        return res.status(200).json({
+            ok: true,
+            msg: 'todo bien',
+            faltante:montosFalt
+        });
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Algo salió mal.',
+            error: error.message,
+        });
+    }
+}
+
 module.exports = {
     buscarPeriodo,
     crearPeriodo,
-    obtenerPeriodos
+    obtenerPeriodos,
+    obtenerFaltante
 };
