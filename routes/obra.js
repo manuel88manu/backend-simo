@@ -8,9 +8,9 @@ const {check}=require('express-validator')
 const router=Router();
 const { validarCampos } = require('../middlewares/validar-campos');
 const {validarJWT}=require('../middlewares/validar-jwt');
-const { agregarObra, agregarConcepto, agregarPartida, actualizarPresupuesto, obtenerPartidasAgregadas, obtenerConceptos, actualizarConcepto, actualizarPartida, eliminarConcepto, eliminarPartida, eliminarObra } = require('../controllers/obra');
-const { validarNuevaObra } = require('../middlewares/validar-nuevaobra-js');
-const { validarNuevaObrayDicatamen } = require('../middlewares/validar-nuevaobra-js');
+const { agregarObra, agregarConcepto, agregarPartida, actualizarPresupuesto, obtenerPartidasAgregadas, obtenerConceptos, actualizarConcepto, actualizarPartida, eliminarConcepto, eliminarPartida, eliminarObra, obtenerObrasTipoPresu } = require('../controllers/obra');
+const { validarNuevaObra } = require('../middlewares/validar-nuevaobra.js');
+const { validarNuevaObrayDicatamen } = require('../middlewares/validar-nuevaobra.js');
 
 
 
@@ -118,6 +118,10 @@ router.delete(
 
 router.delete(
     '/deleteobra/:idobra',eliminarObra
+)
+
+router.get(
+    '/getObrasPresu',obtenerObrasTipoPresu
 )
 
 module.exports=router;

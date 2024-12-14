@@ -36,8 +36,9 @@ const agregarObra = async (req, res = express.response) => {
         //------------Validar Presupuesto Fechas limites--------------------------
 
         //Fecha y año actual 
-        const fechaHoy = new Date('2024-01-30T00:00:00Z'); //Prueba
-        //const fechaHoy = new Date();
+        //const fechaHoy = new Date('2024-01-30T00:00:00Z'); //Prueba
+
+        const fechaHoy = new Date();
         const añoActual = fechaHoy.getUTCFullYear(); 
 
         //Fecha para faismun, prodim y otros
@@ -1551,6 +1552,56 @@ const eliminarObra=async(req, res = express.response) => {
     });
  }
 }
+const obtenerObrasTipoPresu=async(req, res = express.response) => {
+    try {
+        const {idPresupuesto,num_obra}=req.query
+        
+        const presuexiste= await ejecutarConsulta(`select * from presupuesto where idPresupuesto=?`
+                                                        ,[idPresupuesto]
+        )
+        if(presuexiste.length===0){
+            return res.status(401).json({
+                ok: false,
+                msg:`El presupuesto no existe en la base de datos`
+            });
+        }
+
+        let obrasEncontradas=[]
+
+        if (/^\d+\/\d+-(PR|CP)$/.test(num_obra)) {
+        const obrasNum=await ejecutarConsulta(`
+            select * from obra where Presupuesto_idPresupuesto=? AND num_obra=?`,
+            [idPresupuesto,num_obra])
+        if(obrasNum.length==0){
+          obrasEncontradas=[]
+        }else{  
+        obrasEncontradas=obrasNum
+        }
+        }else{
+          const obras= await ejecutarConsulta(
+            `select *from obra where Presupuesto_idPresupuesto=?`,
+        [idPresupuesto])  
+
+            if(obras.length===0){
+                obrasEncontradas=[]
+            }
+            else{
+                obrasEncontradas=obras
+            }
+        }
+        return res.status(200).json({
+            ok: true,
+            msg: 'Todo Bien',
+            obras:obrasEncontradas
+        });
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Algo salió mal.',
+            error: error.message,
+        });
+    }
+}
 
 module.exports = {
     agregarObra,
@@ -1563,5 +1614,6 @@ module.exports = {
     actualizarPartida,
     eliminarConcepto,
     eliminarPartida,
-    eliminarObra
+    eliminarObra,
+    obtenerObrasTipoPresu
 };
