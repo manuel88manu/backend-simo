@@ -1569,8 +1569,11 @@ const obtenerObrasTipoPresu=async(req, res = express.response) => {
         let obrasEncontradas=[]
 
         if (/^\d+\/\d+-(PR|CP)$/.test(num_obra)) {
-        const obrasNum=await ejecutarConsulta(`
-            select * from obra where Presupuesto_idPresupuesto=? AND num_obra=?`,
+        const obrasNum=await ejecutarConsulta(`SELECT *,
+            CONCAT('CANTIDAD: ', cap_cantidad, ' ', cap_unidad, '<br>BENEFICIADOS: ', bene_cantidad, ' ', bene_unidad) AS metas
+            FROM obra
+            WHERE Presupuesto_idPresupuesto = ? 
+            AND num_obra=?`,
             [idPresupuesto,num_obra])
         if(obrasNum.length==0){
           obrasEncontradas=[]
@@ -1579,7 +1582,10 @@ const obtenerObrasTipoPresu=async(req, res = express.response) => {
         }
         }else{
           const obras= await ejecutarConsulta(
-            `select *from obra where Presupuesto_idPresupuesto=?`,
+            `SELECT *,
+            CONCAT('CANTIDAD: ', cap_cantidad, ' ', cap_unidad, '<br>BENEFICIADOS: ', bene_cantidad, ' ', bene_unidad) AS metas
+            FROM obra
+            WHERE Presupuesto_idPresupuesto = ?;`,
         [idPresupuesto])  
 
             if(obras.length===0){
