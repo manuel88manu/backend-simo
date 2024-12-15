@@ -8,7 +8,7 @@ const {check}=require('express-validator')
 const router=Router();
 const { validarCampos } = require('../middlewares/validar-campos');
 const {validarJWT}=require('../middlewares/validar-jwt');
-const { agregarObra, agregarConcepto, agregarPartida, actualizarPresupuesto, obtenerPartidasAgregadas, obtenerConceptos, actualizarConcepto, actualizarPartida, eliminarConcepto, eliminarPartida, eliminarObra, obtenerObrasTipoPresu } = require('../controllers/obra');
+const { agregarObra, agregarConcepto, agregarPartida, actualizarPresupuesto, obtenerPartidasAgregadas, obtenerConceptos, actualizarConcepto, actualizarPartida, eliminarConcepto, eliminarPartida, eliminarObra, obtenerObrasTipoPresu, actualizarNumAproba } = require('../controllers/obra');
 const { validarNuevaObra } = require('../middlewares/validar-nuevaobra.js');
 const { validarNuevaObrayDicatamen } = require('../middlewares/validar-nuevaobra.js');
 
@@ -122,6 +122,21 @@ router.delete(
 
 router.get(
     '/getObrasPresu',obtenerObrasTipoPresu
+)
+router.put(
+    '/updatenumaproba',[
+        check('idobra')
+        .trim() // Elimina espacios al principio y al final
+        .notEmpty().withMessage('El idobra es obligatorio'),
+        check('num_aproba.codigo')
+        .trim() // Elimina espacios al principio y al final
+        .notEmpty().withMessage('El numero de aprobacion es obligatorio')
+        .isString().withMessage('El numero de aprobacion debe ser un texto'),
+        check('num_aproba.fecha')
+            .notEmpty().withMessage('La fecha de aprobacion obligatoria')
+            .isISO8601().withMessage('La fecha de aprobacion debe estar en formato válido'),
+        validarCampos
+    ],actualizarNumAproba
 )
 
 module.exports=router;

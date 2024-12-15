@@ -1609,6 +1609,45 @@ const obtenerObrasTipoPresu=async(req, res = express.response) => {
     }
 }
 
+const actualizarNumAproba=async(req, res = express.response) => {
+try {
+    const {idobra,num_aproba}=req.body
+
+    const obraExiste= await ejecutarConsulta(`select* from obra where idobra=?`,
+                                        [idobra]
+    )
+
+    if(obraExiste.length===0){
+        return res.status(401).json({
+            ok: false,
+            msg:`La obra no existe en la base de datos`
+        });
+    }
+
+     // Crear objeto Date
+    const fechaObjeto = new Date(num_aproba.fecha);
+
+   // Opciones para formatear
+    const opciones = { day: '2-digit', month: 'short', year: 'numeric' };
+
+    // Formatear la fecha
+    const fechaFormateada = fechaObjeto.toLocaleDateString('es-ES', opciones).replace('.', '').toLowerCase();
+    const num_aproba_conca=`${num_aproba.codigo}\n Fecha: \n${fechaFormateada}`
+    await ejecutarConsulta(`update obra set num_aproba=? where idobra=?`,[num_aproba_conca,idobra])
+
+    return res.status(200).json({
+        ok: true,
+        msg: 'Todo Bien',
+    });
+} catch (error) {
+    return res.status(500).json({
+        ok: false,
+        msg: 'Algo salió mal.',
+        error: error.message,
+    });
+}
+}
+
 module.exports = {
     agregarObra,
     agregarPartida,
@@ -1621,5 +1660,6 @@ module.exports = {
     eliminarConcepto,
     eliminarPartida,
     eliminarObra,
-    obtenerObrasTipoPresu
+    obtenerObrasTipoPresu,
+    actualizarNumAproba
 };
