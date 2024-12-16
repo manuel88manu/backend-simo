@@ -19,12 +19,12 @@ const agregarObra = async (req, res = express.response) => {
         }
 
         // Validar si la obra ya existe con el mismo nombre y otros atributos
-        const validacionObra = `SELECT * FROM obra WHERE num_obra=?`;
-        const valoresValidacion = [
-            obra.num_obra
-        ];
+            const validacionObra = `SELECT * FROM obra WHERE num_obra=?`;
+            const valoresValidacion = [
+                obra.num_obra
+            ];
 
-        const resultadoObraExistente = await ejecutarConsulta(validacionObra, valoresValidacion);
+            const resultadoObraExistente = await ejecutarConsulta(validacionObra, valoresValidacion);
 
         if (resultadoObraExistente.length > 0) {
             return res.status(400).json({
@@ -1648,6 +1648,41 @@ try {
 }
 }
 
+const buscarObras=async(req, res = express.response) => {
+ try {
+    const {año,tipo,programa,num_obra}= req.query
+    const query=`SELECT 
+                            o.*,
+                            CONCAT('CANTIDAD: ', o.cap_cantidad, ' ', o.cap_unidad, '<br>BENEFICIADOS: ', o.bene_cantidad, ' ', o.bene_unidad) AS metas
+                        FROM 
+                            obra o
+                        JOIN 
+                            presupuesto p ON o.Presupuesto_idPresupuesto = p.idPresupuesto
+                        JOIN 
+                            periodo pe ON p.periodo_idperiodo = pe.idperiodo
+                        WHERE 
+                            (pe.año = ? OR ? = '' )  
+                            AND (p.tipo = ? OR ? ='') 
+                              AND (o.programa = ? OR ? ='')  
+                            AND (o.num_obra = ? OR ? ='')
+                        ;`
+    const obras= await ejecutarConsulta(query,[año,año,tipo,tipo,programa,programa,num_obra,num_obra])
+    
+    return res.status(200).json({
+        ok: true,
+        msg: 'Todo Bien',
+        obras,
+    });
+
+ } catch (error) {
+    return res.status(500).json({
+        ok: false,
+        msg: 'Algo salió mal.',
+        error: error.message,
+    });
+ }
+}
+
 module.exports = {
     agregarObra,
     agregarPartida,
@@ -1661,5 +1696,6 @@ module.exports = {
     eliminarPartida,
     eliminarObra,
     obtenerObrasTipoPresu,
-    actualizarNumAproba
+    actualizarNumAproba,
+    buscarObras
 };
