@@ -1623,6 +1623,8 @@ try {
             msg:`La obra no existe en la base de datos`
         });
     }
+    
+    const num_obra=obraExiste[0].num_obra
 
      // Crear objeto Date
     const fechaObjeto = new Date(num_aproba.fecha);
@@ -1638,6 +1640,7 @@ try {
     return res.status(200).json({
         ok: true,
         msg: 'Todo Bien',
+        num_obra
     });
 } catch (error) {
     return res.status(500).json({

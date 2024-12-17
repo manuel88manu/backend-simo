@@ -7,7 +7,7 @@
 const {Router}=require('express')
 const {check}=require('express-validator')
 const router=Router();
-const {crearUsuario, loginUsuario, revalidarToken, getUsuarios, actualizarUsuario}=require('../controllers/auth');
+const {crearUsuario, loginUsuario, revalidarToken, getUsuarios, actualizarUsuario, agregarMovimiento}=require('../controllers/auth');
 const { validarCampos } = require('../middlewares/validar-campos');
 const {validarJWT}=require('../middlewares/validar-jwt')
 
@@ -54,7 +54,8 @@ router.put('/:id',[
       check('rol', 'El rol es obligatorio').not().isEmpty(),
       validarJWT
 ],actualizarUsuario)
-    
+
+router.post('/movimientos',agregarMovimiento)
 
 
 module.exports=router;

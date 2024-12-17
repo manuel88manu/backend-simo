@@ -1,7 +1,8 @@
 const express = require('express');
 const bcrypt=require('bcryptjs')
 const { ejecutarConsulta } = require('../database/config');
-const{generarJWT}=require('../helpers/jwt')
+const{generarJWT}=require('../helpers/jwt');
+const { getCurrentDateTime } = require('../helpers/funciones');
 
 const crearUsuario = async (req, res = express.response) => {
     const { nombre, correo, username, activo, celular,rol,contraseña} = req.body;
@@ -180,10 +181,40 @@ const getUsuarios=async(req, res = express.response)=>{
       }
 
     }
+
+ const agregarMovimiento=async(req,res=express.response)=>{
+    try {
+        const {idUsuario,accion,correo}=req.body
+
+        const existeUser= await ejecutarConsulta(`select * from usuario where idusuario=?`,[idUsuario])
+        if(existeUser.length===0){
+            return res.status(401).json({
+                ok: false,
+                msg:`El usuario no existe en la base de datos`
+            });
+        }
+        
+        const fecha=getCurrentDateTime()
+        await ejecutarConsulta(`insert into movimientos (usuario_idusuario,correo,accion,fecha) 
+                              values(?,?,?,?)`,[idUsuario,correo,accion,fecha])
+
+        return res.status(200).json({
+            ok: true,
+            msg:'Todo Bien',
+           })
+    } catch (error) {
+        return res.status(400).json({
+            ok:false,
+            msg:'Error en actualizar usuario'
+     })
+    }
+ }
+
 module.exports = {
     crearUsuario,
     loginUsuario,
     revalidarToken,
     getUsuarios,
-    actualizarUsuario
+    actualizarUsuario,
+    agregarMovimiento
 };
