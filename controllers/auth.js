@@ -210,11 +210,38 @@ const getUsuarios=async(req, res = express.response)=>{
     }
  }
 
+ const obtenerMovimientoUsuario=async(req,res=express.response)=>{
+    try {
+        const {dia,año,correo}=req.query
+        const movimientos= await ejecutarConsulta(`SELECT * 
+                                                    FROM movimientos 
+                                                    WHERE 
+                                                        (correo = ? OR ? = '') 
+                                                        AND (DATE(fecha) = ? OR ? IS NULL)  -- Cambié la verificación de cadena vacía a NULL
+                                                        AND (YEAR(fecha) = ? OR ? IS NULL)  -- Cambié la verificación de cadena vacía a NULL
+                                                    ORDER BY fecha DESC;`,
+                                                [correo,correo,dia,dia,año,año])
+        return res.status(200).json({
+            ok: true,
+            msg:'Todo Bien',
+            movimientos
+           })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({
+            ok:false,
+            msg:'Error en actualizar usuario'
+     })
+    }
+
+ }
+
 module.exports = {
     crearUsuario,
     loginUsuario,
     revalidarToken,
     getUsuarios,
     actualizarUsuario,
-    agregarMovimiento
+    agregarMovimiento,
+    obtenerMovimientoUsuario
 };
