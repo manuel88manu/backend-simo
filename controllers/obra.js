@@ -425,7 +425,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                            montoRestante:montoRes,
                            montoObra:montoObra,
                            montoRestaurado:montoRestaurado,
-                          msg: `El presupuesto de esta obra $${presupuesto} excede el monto disponible de $${montoRestaurado} para las obras ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}.`,
+                          msg: `El presupuesto de esta obra $${presupuesto.toFixed(2)} excede el monto disponible de $${montoRestaurado.toFixed(2)} para las obras ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}.`,
                           });
                               }
                 
@@ -463,7 +463,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                         sumaIndirectos:sumaIndirectos,
                                         porIndectos:porIndirectos,
                                         ok: false,
-                                        msg: `El presupuesto destinado para indirectos de Faismun no debe ser máximo del 3%, es decir, de $${porIndirectos} y el presupuesto estimado para la obra es de $${presupuesto}  sumado a los $${sumaIndirectos} excede el maximo`,
+                                        msg: `El presupuesto destinado para indirectos de Faismun no debe ser máximo del 3%, es decir, de $${porIndirectos.toFixed(2)} y el presupuesto estimado para la obra es de $${presupuesto.toFixed(2)}  sumado a los $${sumaIndirectos.toFixed(2)} excede el maximo`,
                                     });
                                 }
 
@@ -521,7 +521,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                         sumaProdim:sumaProdim,
                                         porProdim:porProdim,
                                         ok: false,
-                                        msg: `El presupuesto destinado para prodim de Faismun no debe ser máximo del 2%, es decir, de $${porProdim} y el presupuesto estimado para la obra es de $${presupuesto} sumado a los $${sumaProdim} ya existentes excede el maximo `,
+                                        msg: `El presupuesto destinado para prodim de Faismun no debe ser máximo del 2%, es decir, de $${porProdim.toFixed(2)} y el presupuesto estimado para la obra es de $${presupuesto.toFixed(2)} sumado a los $${sumaProdim.toFixed(2)} ya existentes excede el maximo `,
                                     });
                                 }
 
@@ -596,12 +596,12 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                   if(fechaHoy<=fechaLimitProdim){
                                 // Calcular cuánto falta para completar el 5% total (indirectos + prodim)
                                   montoFaltanteIndirectosProdim = montoTotalIndirectosProdim - (sumaIndirectos + sumaProdim);
-                                  mensaje=`No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos y prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`
+                                  mensaje=`No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos y prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim.toFixed(2)}.`
                                 }else{
                                    const presuProdim= montoInicial* 0.02
                                    const faltante = presuProdim-sumaProdim
                                    montoFaltanteIndirectosProdim = (montoTotalIndirectosProdim - (sumaIndirectos + sumaProdim))-faltante;
-                                   mensaje=`No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`
+                                   mensaje=`No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos. Queda pendiente un monto de $${montoFaltanteIndirectosProdim.toFixed(2)}.`
 
 
                                 }
@@ -626,7 +626,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                                 presupuesto: presupuesto,
                                                 montoFaltante: montoFaltanteIndirectosProdim,
                                                 ok: false,
-                                                msg: `No se puede asignar el presupuesto solicitado, ya que el monto_rest es insuficiente. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`,
+                                                msg: `No se puede asignar el presupuesto solicitado, ya que el monto_rest es insuficiente. Queda pendiente un monto de $${montoFaltanteIndirectosProdim.toFixed(2)}.`,
                                             });
                                         }
                                     }
@@ -662,7 +662,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                                     presupuesto: presupuesto,
                                                     montoFaltante: montoFaltanteZonaDirecta,
                                                     ok: false,
-                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para ZAP a Incidencia directa. Queda pendiente un monto de $${montoFaltanteZonaDirecta}.`,
+                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para ZAP a Incidencia directa. Queda pendiente un monto de $${montoFaltanteZonaDirecta.toFixed(2)}.`,
                                                 });
                                             }
                                         }
@@ -727,7 +727,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                     sumaProdim:sumaProdim,
                                     porProdim:porProdim,
                                     ok: false,
-                                    msg: `El presupuesto destinado para prodim de Faismun no debe ser máximo del 2%, es decir, de $${porProdim} y el presupuesto estimado para la obra es de $${presupuesto} sumado a los $${sumaProdim} ya existentes excede el maximo `,
+                                    msg: `El presupuesto destinado para prodim de Faismun no debe ser máximo del 2%, es decir, de $${porProdim.toFixed(2)} y el presupuesto estimado para la obra es de $${presupuesto.toFixed(2)} sumado a los $${sumaProdim.toFixed(2)} ya existentes excede el maximo `,
                                 });
                             }
 
@@ -798,7 +798,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                   if(fechaHoy<=fechaLimitProdim){
                                      // Calcular cuánto falta para completar el 5% total (indirectos + prodim)
                                   montoFaltanteIndirectosProdim = montoTotalIndirectosProdim -sumaProdim;
-                                  mensaje=`No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`
+                                  mensaje=`No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim.toFixed(2)}.`
                                   }
                                   else{
                                     const presuProdim= montoInicial* 0.02
@@ -851,7 +851,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                                     presupuesto: presupuesto,
                                                     montoFaltante: montoFaltanteZonaDirecta,
                                                     ok: false,
-                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para ZAP a Incidencia directa. Queda pendiente un monto de $${montoFaltanteZonaDirecta}.`,
+                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para ZAP e Incidencia directa. Queda pendiente un monto de $${montoFaltanteZonaDirecta.toFixed(2)}.`,
                                                 });
                                             }
                                         }
@@ -919,7 +919,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                         sumaIndirectos:sumaIndirectos,
                                         porIndectos:porIndirectos,
                                         ok: false,
-                                        msg: `El presupuesto destinado para indirectos de Faismun no debe ser máximo del 3%, es decir, de $${porIndirectos} y el presupuesto estimado para la obra es de $${presupuesto}  sumado a los $${sumaIndirectos} excede el maximo`,
+                                        msg: `El presupuesto destinado para indirectos de Faismun no debe ser máximo del 3%, es decir, de $${porIndirectos.toFixed(2)} y el presupuesto estimado para la obra es de $${presupuesto.toFixed(2)}  sumado a los $${sumaIndirectos.toFixed(2)} excede el maximo`,
                                     });
                                 }
 
@@ -983,7 +983,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                                     presupuesto: presupuesto,
                                                     montoFaltante: montoFaltanteIndirectosProdim,
                                                     ok: false,
-                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos y prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`,
+                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos y prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim.toFixed(2)}.`,
                                                 });
                                             }
                                         }
@@ -1020,7 +1020,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                                     presupuesto: presupuesto,
                                                     montoFaltante: montoFaltanteZonaDirecta,
                                                     ok: false,
-                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para ZAP a Incidencia directa. Queda pendiente un monto de $${montoFaltanteZonaDirecta}.`,
+                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para ZAP a Incidencia directa. Queda pendiente un monto de $${montoFaltanteZonaDirecta.toFixed(2)}.`,
                                                 });
                                             }
 
@@ -1100,7 +1100,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                                     presupuesto: presupuesto,
                                                     montoFaltante: montoFaltanteZonaDirecta,
                                                     ok: false,
-                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para ZAP a Incidencia directa. Queda pendiente un monto de $${montoFaltanteZonaDirecta}.`,
+                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para ZAP a Incidencia directa. Queda pendiente un monto de $${montoFaltanteZonaDirecta.toFixed(2)}.`,
                                                 });
                                             }
                                         }
@@ -1171,7 +1171,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                            montoRestante:montoRes,
                            montoObra:montoObra,
                            montoRestaurado:montoRestaurado,
-                          msg: `El presupuesto de esta obra $${presupuesto} excede el monto disponible de $${montoRestaurado} para las obras ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}.`,
+                          msg: `El presupuesto de esta obra $${presupuesto.toFixed(2)} excede el monto disponible de $${montoRestaurado.toFixed(2)} para las obras ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}.`,
                           });
                         }
 
@@ -1215,7 +1215,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                                     presupuesto: presupuesto,
                                                     montoFaltante: montoFaltanteSeguriPubli,
                                                     ok: false,
-                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para Seguridad Publica Queda pendiente un monto de $${montoFaltanteSeguriPubli}.`,
+                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para Seguridad Publica Queda pendiente un monto de $${montoFaltanteSeguriPubli.toFixed(2)}.`,
                                                 });
                                             }
                                         }
