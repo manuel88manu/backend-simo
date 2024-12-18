@@ -36,7 +36,7 @@ const agregarObra = async (req, res = express.response) => {
         //------------Validar Presupuesto Fechas limites--------------------------
 
         //Fecha y año actual 
-        //const fechaHoy = new Date('2024-01-30T00:00:00Z'); //Prueba
+        //const fechaHoy = new Date('2024-06-20T00:00:00Z'); //Prueba
 
         const fechaHoy = new Date();
         const añoActual = fechaHoy.getUTCFullYear(); 
@@ -562,8 +562,20 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                 const resultMontoInicial = await ejecutarConsulta(obtenerMontoInicial, [idpresupuesto]);
                                 const montoInicial = resultMontoInicial[0].monto_inici;
                                  
-                                // Calcular el monto total destinado para indirectos y prodim (5%)
-                                const montoTotalIndirectosProdim = montoInicial * 0.05;  // 3% indirectos + 2% prodim
+                                //-----*****------------------Validacion------------*******----------------------------------
+                                    //Fecha y año actual 
+                                    //const fechaHoy = new Date('2024-07-01T00:00:00Z'); 
+
+                                    const fechaHoy = new Date();
+                                    const añoActual = fechaHoy.getUTCFullYear(); 
+
+                                    //Fecha para faismun, prodim y otros
+                                    const fechaLimitProdim = new Date(Date.UTC(añoActual, 5, 30)); // 30 de junio del año actual en UTC
+                                    fechaLimitProdim.setUTCHours(23, 59, 59, 999);
+                                    
+                
+                                     // Calcular el monto total destinado para indirectos y prodim (5%)
+                                     const montoTotalIndirectosProdim = montoInicial * 0.05;  // 3% indirectos + 2% prodim
                             
                                 // Obtener la suma actual de los presupuestos para indirectos y prodim
                                 const obtenerSumaIndirectosProdim = `
@@ -578,8 +590,21 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                 const sumaIndirectos = sumaTotalResult[0].suma_indirectos;
                                 const sumaProdim = sumaTotalResult[0].suma_prodim;
                             
+                                  let montoFaltanteIndirectosProdim;
+                                  let mensaje;
+
+                                  if(fechaHoy<=fechaLimitProdim){
                                 // Calcular cuánto falta para completar el 5% total (indirectos + prodim)
-                                const montoFaltanteIndirectosProdim = montoTotalIndirectosProdim - (sumaIndirectos + sumaProdim);
+                                  montoFaltanteIndirectosProdim = montoTotalIndirectosProdim - (sumaIndirectos + sumaProdim);
+                                  mensaje=`No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos y prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`
+                                }else{
+                                   const presuProdim= montoInicial* 0.02
+                                   const faltante = presuProdim-sumaProdim
+                                   montoFaltanteIndirectosProdim = (montoTotalIndirectosProdim - (sumaIndirectos + sumaProdim))-faltante;
+                                   mensaje=`No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`
+
+
+                                }
 
                                 // Si falta algún monto para completar el 5%, validamos que no se afecte
                                 if (montoFaltanteIndirectosProdim > 0) {
@@ -593,7 +618,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                                     presupuesto: presupuesto,
                                                     montoFaltante: montoFaltanteIndirectosProdim,
                                                     ok: false,
-                                                    msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para indirectos y prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`,
+                                                    msg: mensaje,
                                                 });
                                             }
                                         } else {
@@ -741,6 +766,19 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                 const resultMontoInicial = await ejecutarConsulta(obtenerMontoInicial, [idpresupuesto]);
                                 const montoInicial = resultMontoInicial[0].monto_inici;
 
+                                  //-----*****------------------Validacion------------*******----------------------------------
+                                 //Fecha y año actual 
+                                    //const fechaHoy = new Date('2024-07-01T00:00:00Z'); 
+
+                                    const fechaHoy = new Date();
+                                    const añoActual = fechaHoy.getUTCFullYear(); 
+
+                                    //Fecha para faismun, prodim y otros
+                                    const fechaLimitProdim = new Date(Date.UTC(añoActual, 5, 30)); // 30 de junio del año actual en UTC
+                                    fechaLimitProdim.setUTCHours(23, 59, 59, 999);
+                                    
+                
+
                                  // Calcular el monto total destinado para  prodim (5%)
                                  const montoTotalIndirectosProdim = montoInicial * 0.02;  //  2% prodim
 
@@ -754,8 +792,19 @@ const actualizarPresupuesto = async (req, res = express.response) => {
 
                                 const sumaTotalResult = await ejecutarConsulta(obtenerSumaIndirectosProdim, [idpresupuesto, idobra]);
                                 const sumaProdim = sumaTotalResult[0].suma_prodim;
-                                 // Calcular cuánto falta para completar el 5% total (indirectos + prodim)
-                                 const montoFaltanteIndirectosProdim = montoTotalIndirectosProdim - sumaProdim;
+
+                                  let montoFaltanteIndirectosProdim;
+                                  let mensaje;
+                                  if(fechaHoy<=fechaLimitProdim){
+                                     // Calcular cuánto falta para completar el 5% total (indirectos + prodim)
+                                  montoFaltanteIndirectosProdim = montoTotalIndirectosProdim -sumaProdim;
+                                  mensaje=`No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`
+                                  }
+                                  else{
+                                    const presuProdim= montoInicial* 0.02
+                                    const faltante = presuProdim-sumaProdim
+                                    montoFaltanteIndirectosProdim = (montoTotalIndirectosProdim - sumaProdim)-faltante;
+                                  }
 
                                  // Si falta algún monto para completar el 2%, validamos que no se afecte
                                 if (montoFaltanteIndirectosProdim > 0) {
@@ -767,7 +816,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                                 presupuesto: presupuesto,
                                                 montoFaltante: montoFaltanteIndirectosProdim,
                                                 ok: false,
-                                                msg: `No se puede asignar el presupuesto solicitado, ya que afectaría el monto destinado para prodim. Queda pendiente un monto de $${montoFaltanteIndirectosProdim}.`,
+                                                msg: mensaje,
                                             });
                                         }
                                     }
