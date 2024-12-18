@@ -561,7 +561,7 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                             
                                 const resultMontoInicial = await ejecutarConsulta(obtenerMontoInicial, [idpresupuesto]);
                                 const montoInicial = resultMontoInicial[0].monto_inici;
-                            
+                                 
                                 // Calcular el monto total destinado para indirectos y prodim (5%)
                                 const montoTotalIndirectosProdim = montoInicial * 0.05;  // 3% indirectos + 2% prodim
                             
