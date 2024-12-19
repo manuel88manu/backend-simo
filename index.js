@@ -25,6 +25,8 @@ app.use('/api/obra',require('./routes/obra'))
 
 app.use('/api/expedi',require('./routes/expedi'))
 
+app.use('/api/excel',require('./routes/excel'))
+
 //Escuchar peticiones 
 app.listen(process.env.PORT,()=>{
     console.log(`Servidor corriendo en puerto ${process.env.PORT}`)
