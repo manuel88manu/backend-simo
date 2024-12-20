@@ -614,7 +614,7 @@ fontFamily:'Century Gothic',
 })
 
 const iniciotext=sheet.cell('I43')
-iniciotext.value(dictamen.fec_inicio).style({
+iniciotext.value(new Date(dictamen.fec_inicio).toLocaleDateString('es-ES')).style({
 bold:false,
 fontSize: 10,
 fontFamily:'Century Gothic',
@@ -635,7 +635,7 @@ fontFamily:'Century Gothic',
 })
 
 const terminotext=sheet.cell('I44')
-terminotext.value(dictamen.fec_termino).style({
+terminotext.value(new Date(dictamen.fec_termino).toLocaleDateString('es-ES')).style({
 bold:false,
 fontSize: 10,
 fontFamily:'Century Gothic',
@@ -844,7 +844,7 @@ fs.mkdirSync(directoryPath, { recursive: true });
 const sanitizedObraNum = obra.num_obra.replace(/[\/\\?%*:|"<>\.]/g, '-'); // Reemplaza caracteres no permitidos por guion
 
 // Ruta para guardar el archivo Excel
-const filePath = path.join(directoryPath, `CedulaRegistro-${sanitizedObraNum}.xlsx`);
+const filePath = path.join(directoryPath, `Report.xlsx`);
 
 
 // Guardar el archivo Excel usando XlsxPopulate
@@ -853,11 +853,7 @@ await workbook.toFileAsync(filePath);
 //------------Agregar Logos----------------------
 
 // Enviar el archivo al cliente para que lo descargue
-res.download(filePath, `CedulaRegistro-${sanitizedObraNum}.xlsx`, (err) => {
-if (err) {
-console.error('Error enviando el archivo:', err);
-}
-});
+res.download(filePath, `CedulaRegistro.xlsx`)
 
 } catch (error) {
 console.log(error);
