@@ -17,13 +17,6 @@ const sheet= workbook.sheet(0)
 //const workbook = await XlsxPopulate.fromBlankAsync();
 //const sheet = workbook.addSheet('Cedula de Registro');
 
-
-
-//IMAGENES
-const imagePath = path.join(__dirname, 'images', 'logoimplanexcel.jpg');
-const imageBuffer = fs.readFileSync(imagePath);
-
-
 const styletitulo = { 
 bold: true, 
 fontSize: 14,
@@ -844,7 +837,7 @@ fs.mkdirSync(directoryPath, { recursive: true });
 const sanitizedObraNum = obra.num_obra.replace(/[\/\\?%*:|"<>\.]/g, '-'); // Reemplaza caracteres no permitidos por guion
 
 // Ruta para guardar el archivo Excel
-const filePath = path.join(directoryPath, `Report.xlsx`);
+const filePath = path.join(directoryPath, `Cedula.xlsx`);
 
 
 // Guardar el archivo Excel usando XlsxPopulate
@@ -853,7 +846,21 @@ await workbook.toFileAsync(filePath);
 //------------Agregar Logos----------------------
 
 // Enviar el archivo al cliente para que lo descargue
-res.download(filePath, `CedulaRegistro.xlsx`)
+res.download(filePath, `CedulaRegistro.xlsx`, (err) => {
+    // Callback que se ejecuta después de que el archivo es descargado o ocurre un error
+    if (err) {
+        console.error('Error al descargar el archivo:', err);
+    }
+
+    // Eliminar el archivo
+    fs.unlink(filePath, (deleteErr) => {
+        if (deleteErr) {
+      
+        } else {
+
+        }
+    });
+});
 
 } catch (error) {
 console.log(error);
@@ -864,6 +871,88 @@ msg: 'Error en la creación del archivo.',
 }
 };
 
+const crearRegistro=async (req, res = express.response) => {
+try {
+
+const {obra,registro}=req.body
+    
+const rutaDoc = 'C:\\Residencia IMPLAN\\simobackend\\controllers\\files\\Solicitud de Obra Plantilla.xlsx';
+const workbook=await XlsxPopulate.fromFileAsync(rutaDoc)
+const sheet= workbook.sheet(0)
+
+//----------------------FECHA------------------------
+const meses = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+const fechaHoy = new Date();
+const dia = fechaHoy.getDate(); // Día del mes
+const mes = meses[fechaHoy.getMonth()]; // Nombre del mes
+const año = fechaHoy.getFullYear(); // Año actual
+
+const fecha=sheet.range('E7:H7')
+fecha.value(`XALISCO, NAYARIT A ${dia} DE ${mes.toUpperCase()} DE ${año}`)
+
+//---------------Nombre de obra-------------------
+const nombre=sheet.range('A21:H26')
+nombre.value(`${obra.nombre}`)
+
+//---------------Nombre de representante-------------------
+const represe=sheet.range('C45:F45')
+represe.value(`${registro.nombre.toUpperCase()}`)
+
+//---------------area-------------------
+const area=sheet.range('C46:F46')
+area.value(`${registro.area.toUpperCase()}`).style({
+})
+
+//-----------------ENVIO-------------------------------
+
+const directoryPath = path.join(__dirname, 'files');
+
+// Verifica si el directorio existe, si no, lo crea
+if (!fs.existsSync(directoryPath)) {
+fs.mkdirSync(directoryPath, { recursive: true });
+}
+
+
+// Ruta para guardar el archivo Excel
+const filePath = path.join(directoryPath, `Solicitud.xlsx`);
+
+// Guardar el archivo Excel usando XlsxPopulate
+await workbook.toFileAsync(filePath);
+
+//------------Agregar Logos----------------------
+
+// Enviar el archivo al cliente para que lo descargue
+res.download(filePath, `solicitud.xlsx`, (err) => {
+    // Callback que se ejecuta después de que el archivo es descargado o ocurre un error
+    if (err) {
+        console.error('Error al descargar el archivo:', err);
+    }
+
+    // Eliminar el archivo
+    fs.unlink(filePath, (deleteErr) => {
+        if (deleteErr) {
+
+        } else {
+ 
+        }
+    });
+});
+
+} catch (error) {
+  console.log(error);
+return res.status(400).json({
+ok: false,
+msg: 'Error en la creación del archivo.',
+});  
+}
+
+}
+
 module.exports = {
-crearCedula
+crearCedula,
+crearRegistro
 };
