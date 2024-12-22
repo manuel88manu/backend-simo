@@ -8,7 +8,7 @@ const crearCedula = async (req, res = express.response) => {
 try {
 const { obra, dictamen, Cedula } = req.body;
 
-const rutaDoc = 'C:\\Residencia IMPLAN\\simobackend\\controllers\\files\\CedulaRegistro-Plantilla.xlsx';
+const rutaDoc = path.join(__dirname, 'files', 'CedulaRegistro-Plantilla.xlsx');
 
 const workbook=await XlsxPopulate.fromFileAsync(rutaDoc)
 const sheet= workbook.sheet(0)
@@ -837,7 +837,7 @@ fs.mkdirSync(directoryPath, { recursive: true });
 const sanitizedObraNum = obra.num_obra.replace(/[\/\\?%*:|"<>\.]/g, '-'); // Reemplaza caracteres no permitidos por guion
 
 // Ruta para guardar el archivo Excel
-const filePath = path.join(directoryPath, `Cedula.xlsx`);
+const filePath = path.join(directoryPath, `Cedula_${Date.now()}.xlsx`);
 
 
 // Guardar el archivo Excel usando XlsxPopulate
@@ -875,8 +875,7 @@ const crearRegistro=async (req, res = express.response) => {
 try {
 
 const {obra,registro}=req.body
-    
-const rutaDoc = 'C:\\Residencia IMPLAN\\simobackend\\controllers\\files\\Solicitud de Obra Plantilla.xlsx';
+const rutaDoc = path.join(__dirname, 'files', 'Solicitud de Obra Plantilla.xlsx');
 const workbook=await XlsxPopulate.fromFileAsync(rutaDoc)
 const sheet= workbook.sheet(0)
 
@@ -918,7 +917,7 @@ fs.mkdirSync(directoryPath, { recursive: true });
 
 
 // Ruta para guardar el archivo Excel
-const filePath = path.join(directoryPath, `Solicitud.xlsx`);
+const filePath = path.join(directoryPath, `Solicitud_${Date.now()}.xlsx`);
 
 // Guardar el archivo Excel usando XlsxPopulate
 await workbook.toFileAsync(filePath);
@@ -951,8 +950,207 @@ msg: 'Error en la creación del archivo.',
 }
 
 }
+const crearComuniActa=async (req, res = express.response) => {
+try {
 
+const {obra,comunidad}=req.body
+const rutaDoc = path.join(__dirname, 'files', 'Acta De Aceptacion Comunidad.xlsx');
+const workbook=await XlsxPopulate.fromFileAsync(rutaDoc)
+const sheet= workbook.sheet(0)
+
+const nombre= sheet.range('G7:K7')
+nombre.merged(true).value(`${comunidad.nombre.toUpperCase()}`).style({
+horizontalAlignment: 'left',  // Alineación horizontal centrada
+});
+
+const zona= sheet.range('O7:U7')
+zona.merged(true).value(`${comunidad.zona.toUpperCase()}`).style({
+horizontalAlignment: 'left',  // Alineación horizontal centrada
+
+});
+
+const obranom= sheet.range('C10:V13')
+obranom.value(`${obra.nombre.toUpperCase()}`)
+
+const caracteris= sheet.range('C17:V27')
+caracteris.value(`${comunidad.caracter.toUpperCase()}`)
+
+const nomrepre= sheet.range('C44:L44')
+nomrepre.value(`${comunidad.represe.toUpperCase()}`)
+
+const area= sheet.range('C45:L46')
+area.value(`${comunidad.area.toUpperCase()}`)
+
+
+//-----------------ENVIO-------------------------------
+
+const directoryPath = path.join(__dirname, 'files');
+
+// Verifica si el directorio existe, si no, lo crea
+if (!fs.existsSync(directoryPath)) {
+fs.mkdirSync(directoryPath, { recursive: true });
+}
+
+// Ruta para guardar el archivo Excel
+const filePath = path.join(directoryPath, `Comunidad_${Date.now()}.xlsx`);
+
+// Guardar el archivo Excel usando XlsxPopulate
+await workbook.toFileAsync(filePath);
+
+res.download(filePath, `acta_comunidad.xlsx`, (err) => {
+    // Callback que se ejecuta después de que el archivo es descargado o ocurre un error
+    if (err) {
+        console.error('Error al descargar el archivo:', err);
+    }
+
+    // Eliminar el archivo
+    fs.unlink(filePath, (deleteErr) => {
+        if (deleteErr) {
+
+        } else {
+ 
+        }
+    });
+});
+
+} catch (error) {
+console.log(error);
+return res.status(400).json({
+ok: false,
+msg: 'Error en la creación del archivo.',
+});  
+}
+}
+
+const crearFactibilidad=async (req, res = express.response) => {
+try {
+
+const {obra,validacion}=req.body
+const rutaDoc = path.join(__dirname, 'files', 'Factibilidad Plantilla.xlsx');
+const workbook=await XlsxPopulate.fromFileAsync(rutaDoc)
+const sheet= workbook.sheet(0)
+
+const obranom= sheet.range('B11:H13')
+obranom.value(`${obra.nombre.toUpperCase()}`)
+
+const nomper= sheet.range('B29:D29')
+nomper.value(`${validacion.nombre.toUpperCase()}`)
+
+const cargo= sheet.range('B30:D30')
+cargo.value(`${validacion.cargo.toUpperCase()}`)
+
+const fechadic=new Date()
+const formattedDate = `${fechadic.getDate().toString().padStart(2, '0')}/${
+  (fechadic.getMonth() + 1).toString().padStart(2, '0')
+}/${fechadic.getFullYear()}`;
+
+const fecha=sheet.range('F32:H32')
+fecha.value(formattedDate)
+
+const opinion=sheet.range('B37:H49')
+opinion.value(validacion.opinion.toUpperCase())
+ 
+
+//-----------------ENVIO-------------------------------
+
+const directoryPath = path.join(__dirname, 'files');
+
+// Verifica si el directorio existe, si no, lo crea
+if (!fs.existsSync(directoryPath)) {
+fs.mkdirSync(directoryPath, { recursive: true });
+}
+
+// Ruta para guardar el archivo Excel
+const filePath = path.join(directoryPath, `Factibilidad_${Date.now()}.xlsx`);
+
+// Guardar el archivo Excel usando XlsxPopulate
+await workbook.toFileAsync(filePath);
+
+res.download(filePath, `validacion.xlsx`, (err) => {
+    // Callback que se ejecuta después de que el archivo es descargado o ocurre un error
+    if (err) {
+        console.error('Error al descargar el archivo:', err);
+    }
+
+    // Eliminar el archivo
+    fs.unlink(filePath, (deleteErr) => {
+        if (deleteErr) {
+
+        } else {
+ 
+        }
+    });
+});
+
+} catch (error) {
+console.log(error);
+return res.status(400).json({
+ok: false,
+msg: 'Error en la creación del archivo.',
+});      
+}
+}
+
+const crearInversion=async (req, res = express.response) => {
+try {
+    const {obra,apoyo}=req.body    
+    const rutaDoc = path.join(__dirname, 'files', 'Acta Apoyo a la Inversion Plantilla.xlsx');
+    const workbook=await XlsxPopulate.fromFileAsync(rutaDoc)
+    const sheet= workbook.sheet(0)
+
+    const obranom= sheet.range('B33:G39')
+    obranom.value(obra.nombre.toUpperCase())
+
+    const nombrecom= sheet.range('A45:H45')
+    nombrecom.value(apoyo.nombre.toUpperCase())
+
+    const cargo=sheet.range('D46:F46')
+    cargo.value(apoyo.cargo.toUpperCase())
+
+    //-----------------ENVIO-------------------------------
+
+const directoryPath = path.join(__dirname, 'files');
+
+// Verifica si el directorio existe, si no, lo crea
+if (!fs.existsSync(directoryPath)) {
+fs.mkdirSync(directoryPath, { recursive: true });
+}
+
+// Ruta para guardar el archivo Excel
+const filePath = path.join(directoryPath, `Inversion_${Date.now()}.xlsx`);
+
+// Guardar el archivo Excel usando XlsxPopulate
+await workbook.toFileAsync(filePath);
+res.download(filePath, `inversion.xlsx`, (err) => {
+    // Callback que se ejecuta después de que el archivo es descargado o ocurre un error
+    if (err) {
+        console.error('Error al descargar el archivo:', err);
+    }
+
+    // Eliminar el archivo
+    fs.unlink(filePath, (deleteErr) => {
+        if (deleteErr) {
+
+        } else {
+ 
+        }
+    });
+});
+
+ 
+} catch (error) {
+ console.log(error);
+return res.status(400).json({
+ok: false,
+msg: 'Error en la creación del archivo.',
+});      
+}
+
+}
 module.exports = {
 crearCedula,
-crearRegistro
+crearRegistro,
+crearComuniActa,
+crearFactibilidad,
+crearInversion
 };
