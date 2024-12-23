@@ -7,7 +7,7 @@
 const {Router}=require('express')
 const {check}=require('express-validator')
 const { validarCampos } = require('../middlewares/validar-campos');
-const { crearCedula, crearRegistro, crearComuniActa, crearFactibilidad, crearInversion } = require('../controllers/excel');
+const { crearCedula, crearRegistro, crearComuniActa, crearFactibilidad, crearInversion, crearCalendario } = require('../controllers/excel');
 
 const router=Router();
 
@@ -20,6 +20,8 @@ router.post('/comunidad',crearComuniActa)
 router.post('/factibi',crearFactibilidad)
 
 router.post('/inversion',crearInversion)
+
+router.post('/calendario',crearCalendario)
 
 
 module.exports=router;

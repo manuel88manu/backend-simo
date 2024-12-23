@@ -1147,10 +1147,358 @@ msg: 'Error en la creación del archivo.',
 }
 
 }
+
+const crearCalendario=async (req, res = express.response) => {
+try {
+
+   const {obra,dictamen,meses,partidas,info}=req.body
+   const rutaDoc = path.join(__dirname, 'files', 'Calendario Plantilla.xlsx');
+   const workbook=await XlsxPopulate.fromFileAsync(rutaDoc)
+   const sheet= workbook.sheet(0)
+
+const nombreObra= sheet.range('C7:J8')
+nombreObra.value(obra.nombre.toUpperCase())
+
+const inicio= sheet.range('O6:S6')
+inicio.value(new Date(dictamen.fec_inicio).toLocaleDateString('es-ES'))
+
+const termino= sheet.range('O7:S7')
+termino.value(new Date(dictamen.fec_termino).toLocaleDateString('es-ES'))
+
+//--------------------------------
+
+const fec_inicio = dictamen.fec_inicio; // Por ejemplo: '2024-12-01'
+const fec_termino = dictamen.fec_termino; // Por ejemplo: '2024-12-19'
+
+// Crear objetos Date a partir de las fechas
+const startDate = new Date(fec_inicio);
+const endDate = new Date(fec_termino);
+
+// Calcular la diferencia en milisegundos
+const differenceInMilliseconds = endDate - startDate;
+
+// Convertir los milisegundos a días (1 día = 86400000 milisegundos)
+const differenceInDays = differenceInMilliseconds / (1000 * 3600 * 24);
+
+// Redondear el resultado al número entero más cercano
+const totalDays = Math.round(differenceInDays);
+
+
+const diasTotal=sheet.range('O8:S8')
+diasTotal.value(`${totalDays} DIAS`)
+
+
+const local= sheet.range('D10:E10')
+local.value(info.lacalidad)
+
+//-------PARTIDAS Y MONTO CON IVA-----------------
+
+const resultado = partidas.map(partida => [partida.nombre_par, Math.round((partida.monto_tot)*1.16)]);
+
+let fila=17
+
+const valores = Object.values(meses); 
+const tamaño=resultado.length
+
+for (let i = 0; i < resultado.length; i++) {
+
+sheet.range(`B${fila}:D${fila}`).merged(true).value(resultado[i][0]).style({border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+}
+}) 
+
+sheet.cell(`E${fila}`).value(resultado[i][1]).style(
+{
+numberFormat: '$#,##0.00',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+}) 
+
+sheet.cell(`F${fila}`).value((resultado[i][1])/(obra.presupuesto)).style(
+{
+numberFormat: '0%',
+horizontalAlignment: 'center',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+}) 
+
+sheet.cell(`G${fila}`).value('PG').style(
+{
+horizontalAlignment: 'center',  
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+}) 
+
+sheet.cell(`H${fila}`).value(1).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '#,##0.00',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//-------------------Enero-------------------------
+
+sheet.cell(`I${fila}`).value(
+"enero" in meses?(sheet.cell(`F${fila}`).value()*(meses.enero/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Febrero-------------------
+
+sheet.cell(`J${fila}`).value(
+"febrero" in meses?(sheet.cell(`F${fila}`).value()*(meses.febrero/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Marzo-------------------
+
+sheet.cell(`K${fila}`).value(
+"marzo" in meses?(sheet.cell(`F${fila}`).value()*(meses.marzo/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Abril------------------
+
+sheet.cell(`L${fila}`).value(
+"abril" in meses?(sheet.cell(`F${fila}`).value()*(meses.abril/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Mayo------------------
+
+sheet.cell(`M${fila}`).value(
+"mayo" in meses?(sheet.cell(`F${fila}`).value()*(meses.mayo/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Junio------------------
+
+sheet.cell(`N${fila}`).value(
+"junio" in meses?(sheet.cell(`F${fila}`).value()*(meses.junio/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Julio------------------
+
+sheet.cell(`O${fila}`).value(
+"julio" in meses?(sheet.cell(`F${fila}`).value()*(meses.julio/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Agosto------------------
+
+sheet.cell(`P${fila}`).value(
+"agosto" in meses?(sheet.cell(`F${fila}`).value()*(meses.agosto/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Septiembre------------------
+
+sheet.cell(`Q${fila}`).value(
+"septiembre" in meses?(sheet.cell(`F${fila}`).value()*(meses.septiembre/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Octubre------------------
+
+sheet.cell(`R${fila}`).value(
+"octubre" in meses?(sheet.cell(`F${fila}`).value()*(meses.octubre/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Noviembre------------------
+
+sheet.cell(`S${fila}`).value(
+"noviembre" in meses?(sheet.cell(`F${fila}`).value()*(meses.noviembre/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------Diciembre------------------
+
+sheet.cell(`T${fila}`).value(
+"diciembre" in meses?(sheet.cell(`F${fila}`).value()*(meses.diciembre/100)):''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+//----------------TOTALES------------------
+
+sheet.cell(`U${fila}`).value(
+(sheet.cell(`F${fila}`).value())
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
+
+}
+})
+
+
+fila=fila+1
+
+}
+
+//-----------------ENVIO-------------------------------
+
+const directoryPath = path.join(__dirname, 'files');
+
+// Verifica si el directorio existe, si no, lo crea
+if (!fs.existsSync(directoryPath)) {
+fs.mkdirSync(directoryPath, { recursive: true });
+}
+
+// Ruta para guardar el archivo Excel
+const filePath = path.join(directoryPath, `Calendario.xlsx`);
+
+// Guardar el archivo Excel usando XlsxPopulate
+await workbook.toFileAsync(filePath);
+
+res.download(filePath, `Calendario.xlsx`)
+
+} catch (error) {
+     console.log(error);
+return res.status(400).json({
+ok: false,
+msg: 'Error en la creación del archivo.',
+});  
+}
+
+}
 module.exports = {
 crearCedula,
 crearRegistro,
 crearComuniActa,
 crearFactibilidad,
-crearInversion
+crearInversion,
+crearCalendario
 };
