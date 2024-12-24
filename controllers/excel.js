@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const XlsxPopulate = require('xlsx-populate'); // Usar la librería xlsx-populate
 const express = require('express');
-const ExcelJS = require("exceljs");
 
 const crearCedula = async (req, res = express.response) => {
 try {

@@ -27,6 +27,8 @@ app.use('/api/expedi',require('./routes/expedi'))
 
 app.use('/api/excel',require('./routes/excel'))
 
+app.use('/api/ftp',require('./routes/ftp'))
+
 //Escuchar peticiones 
 app.listen(process.env.PORT,()=>{
     console.log(`Servidor corriendo en puerto ${process.env.PORT}`)
