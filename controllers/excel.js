@@ -1189,7 +1189,7 @@ diasTotal.value(`${totalDays} DIAS`)
 
 
 const local= sheet.range('D10:E10')
-local.value(info.lacalidad)
+local.value(info.localidad.toUpperCase())
 
 //-------PARTIDAS Y MONTO CON IVA-----------------
 
@@ -1468,6 +1468,1217 @@ fila=fila+1
 
 }
 
+//-------------Agragar Totales------------------------
+
+const total=sheet.cell(`D${fila}`)
+total.value('TOTAL').style({
+bold:true,
+fontSize: 10,
+fontFamily:'Century Gothic',
+horizontalAlignment:'right'
+})
+
+const presutot=sheet.cell(`E${fila}`)
+presutot.value(obra.presupuesto).style({
+bold:true,
+fontSize: 10,
+numberFormat: '$#,##0.00',
+fontFamily:'Century Gothic',
+horizontalAlignment:'right',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: { style: "thin", color: "000000" } 
+}
+})
+presutot.style("fill",{ type: "solid", color: "D8D8D8" })
+
+
+const totalpor=sheet.cell(`F${fila}`)
+totalpor.value(1).style({
+bold:true,
+fontSize: 10,
+numberFormat: '0%',
+fontFamily:'Century Gothic',
+horizontalAlignment:'center',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: { style: "thin", color: "000000" } 
+}
+})
+totalpor.style("fill",{ type: "solid", color: "D8D8D8" })
+
+//---------Total Pocentajes-------------------
+
+//------PorTotal enero-----------
+
+sheet.cell(`I${fila}`).value(
+"enero" in meses?(meses.enero)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+
+//------PorTotal febrero-----------
+
+sheet.cell(`J${fila}`).value(
+"febrero" in meses?(meses.febrero)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal marzo-----------
+
+sheet.cell(`K${fila}`).value(
+"marzo" in meses?(meses.marzo)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal abril-----------
+
+sheet.cell(`L${fila}`).value(
+"abril" in meses?(meses.abril)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal mayo-----------
+
+sheet.cell(`M${fila}`).value(
+"mayo" in meses?(meses.mayo)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal junio-----------
+
+sheet.cell(`N${fila}`).value(
+"junio" in meses?(meses.junio)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal julio-----------
+
+sheet.cell(`O${fila}`).value(
+"julio" in meses?(meses.julio)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal agosto-----------
+
+sheet.cell(`P${fila}`).value(
+"agosto" in meses?(meses.agosto)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal septiembre-----------
+
+sheet.cell(`Q${fila}`).value(
+"septiembre" in meses?(meses.septiembre)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal octubre-----------
+
+sheet.cell(`R${fila}`).value(
+"octubre" in meses?(meses.octubre)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal noviembre-----------
+
+sheet.cell(`S${fila}`).value(
+"noviembre" in meses?(meses.noviembre)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------PorTotal diciembre-----------
+
+sheet.cell(`T${fila}`).value(
+"diciembre" in meses?(meses.diciembre)/100:''
+).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//------TOTAL FINAL-----------
+
+sheet.cell(`U${fila}`).value(1).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: { style: "thin", color: "000000" } 
+}
+})
+
+//------Encargado-----------------
+const varenc= fila+4
+
+const nombrecargo=sheet.range(`E${varenc}:H${varenc}`)
+nombrecargo.merged(true).value(info.nombre.toUpperCase()).style({
+bold:true,
+fontSize: 9,
+fontFamily:'Century Gothic',
+horizontalAlignment:'center',
+border: {
+bottom: { style: "thin", color: "000000" } 
+}
+}
+)
+
+const puestocargo=sheet.range(`E${varenc+1}:H${varenc+1}`)
+puestocargo.merged(true).value(info.cargo.toUpperCase()).style({
+bold:false,
+fontSize: 9,
+fontFamily:'Century Gothic',
+horizontalAlignment:'center',
+}
+)
+
+//----------------Titulos Avance------
+const avanfis=sheet.range(`B${varenc+4}:D${varenc+4}`)
+avanfis.merged(true).value('AVANCE FISICO').style({
+bold:true,
+fontSize: 10,
+fontFamily:'Century Gothic',
+horizontalAlignment:'right',
+}
+)
+
+const avanfinan=sheet.range(`B${varenc+6}:D${varenc+6}`)
+avanfinan.merged(true).value('AVANCE FINANCIERO').style({
+bold:true,
+fontSize: 10,
+fontFamily:'Century Gothic',
+horizontalAlignment:'right',
+}
+)
+
+const parci=sheet.cell(`G${varenc+4}`)
+parci.value('PARCIAL%').style({
+bold:true,
+fontSize: 10,
+fontFamily:'Century Gothic',
+horizontalAlignment:'right',
+}
+)
+
+const acumopor=sheet.cell(`G${varenc+5}`)
+acumopor.value('ACUMULADO%').style({
+bold:true,
+fontSize: 10,
+fontFamily:'Century Gothic',
+horizontalAlignment:'right',
+}
+)
+
+const parcimil=sheet.cell(`G${varenc+6}`)
+parcimil.value('PARCIAL (MILES)').style({
+bold:true,
+fontSize: 10,
+fontFamily:'Century Gothic',
+horizontalAlignment:'right',
+}
+)
+const acumil=sheet.cell(`G${varenc+7}`)
+acumil.value('ACUMULADO (MILES)').style({
+bold:true,
+fontSize: 10,
+fontFamily:'Century Gothic',
+horizontalAlignment:'right',
+}
+)
+
+const margenran=sheet.range(`H${varenc+4}:H${varenc+7}`)
+margenran.style(
+{border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+}
+}
+)
+
+//---------------ACUMULACION---------------
+
+let acufil=varenc+4
+
+for (let i = 0; i < 4; i++) {
+
+if(i===0){
+//Enero
+sheet.cell(`I${acufil}`).value(sheet.cell(`I${fila}`).value()).style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+})
+
+//febrero
+sheet.cell(`J${acufil}`).value(sheet.cell(`J${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//marzo
+sheet.cell(`K${acufil}`).value(sheet.cell(`K${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//abril
+sheet.cell(`L${acufil}`).value(sheet.cell(`L${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//MAYO
+sheet.cell(`M${acufil}`).value(sheet.cell(`M${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//JUNIO
+sheet.cell(`N${acufil}`).value(sheet.cell(`N${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//JULIO
+sheet.cell(`O${acufil}`).value(sheet.cell(`O${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//AGOSTO
+sheet.cell(`P${acufil}`).value(sheet.cell(`P${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//SEPTIEMBRE
+sheet.cell(`Q${acufil}`).value(sheet.cell(`Q${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//OCTUBRE
+sheet.cell(`R${acufil}`).value(sheet.cell(`R${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//NOVIEMBRE
+sheet.cell(`S${acufil}`).value(sheet.cell(`S${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//DICIEMBRE
+sheet.cell(`T${acufil}`).value(sheet.cell(`T${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+//TOTALES
+sheet.cell(`U${acufil}`).value(sheet.cell(`U${fila}`).value()).style(
+{
+horizontalAlignment: 'center',  
+numberFormat: '0%',
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+})
+
+}
+
+if(i===1){
+//------------------Enero-------------------------------
+let iPrevValue = Number(sheet.cell(`I${acufil - 1}`).value()) || '';
+let hCurrentValue = Number(sheet.cell(`H${acufil}`).value()) || '';
+
+let newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`I${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------Febrero-------------------------------
+ iPrevValue = Number(sheet.cell(`J${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`I${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`J${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------MARZO-------------------------------
+ iPrevValue = Number(sheet.cell(`K${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`J${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`K${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------ABRIL-------------------------------
+ iPrevValue = Number(sheet.cell(`L${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`K${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`L${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------MAYO-------------------------------
+ iPrevValue = Number(sheet.cell(`M${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`L${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`M${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------JUNIO-------------------------------
+ iPrevValue = Number(sheet.cell(`N${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`M${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`N${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------JULIO-------------------------------
+ iPrevValue = Number(sheet.cell(`O${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`N${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`O${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------AGOSTO-------------------------------
+ iPrevValue = Number(sheet.cell(`P${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`O${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`P${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------SEPTIEMBRE-------------------------------
+ iPrevValue = Number(sheet.cell(`Q${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`P${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`Q${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------OCTUBRE-------------------------------
+ iPrevValue = Number(sheet.cell(`R${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`Q${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`R${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------NOVIEMBRE-------------------------------
+ iPrevValue = Number(sheet.cell(`S${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`R${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`S${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------DICIEMBRE-------------------------------
+ iPrevValue = Number(sheet.cell(`T${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`S${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`T${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+    });
+
+//------------------TOTAL-------------------------------
+ 
+sheet.cell(`U${acufil}`)
+    .value(1)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '0%',
+        bold: true, 
+    });
+
+}
+
+if(i===2){
+//Enero
+sheet.cell(`I${acufil}`).value(Number(sheet.cell(`I${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//febrero
+sheet.cell(`J${acufil}`).value(Number(sheet.cell(`J${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//MARZO
+sheet.cell(`K${acufil}`).value(Number(sheet.cell(`K${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//ABRIL
+sheet.cell(`L${acufil}`).value(Number(sheet.cell(`L${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//MAYO
+sheet.cell(`M${acufil}`).value(Number(sheet.cell(`M${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//JUNIO
+sheet.cell(`N${acufil}`).value(Number(sheet.cell(`N${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//JULIO
+sheet.cell(`O${acufil}`).value(Number(sheet.cell(`O${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//AGOSTO
+sheet.cell(`P${acufil}`).value(Number(sheet.cell(`P${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//SEPTIEMBRE
+sheet.cell(`Q${acufil}`).value(Number(sheet.cell(`Q${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//OCTUBRE
+sheet.cell(`R${acufil}`).value(Number(sheet.cell(`R${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//NOVIEMBRE
+sheet.cell(`S${acufil}`).value(Number(sheet.cell(`S${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//DICIEMBRE
+sheet.cell(`T${acufil}`).value(Number(sheet.cell(`T${acufil-2}`).value()*obra.presupuesto)||'').style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+//TOTAL PRESU
+sheet.cell(`U${acufil}`).value(obra.presupuesto).style(
+{
+border: {
+bottom: { style: "thin", color: "000000" },
+top: { style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',  
+numberFormat: '$#,##0.00'
+})
+
+}
+
+if(i===3){
+//------------------Enero-------------------------------
+let iPrevValue = Number(sheet.cell(`I${acufil - 1}`).value()) || '';
+let hCurrentValue = Number(sheet.cell(`H${acufil}`).value()) || '';
+let newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`I${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------Febrero-------------------------------
+ iPrevValue = Number(sheet.cell(`J${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`I${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`J${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------MARZO-------------------------------
+ iPrevValue = Number(sheet.cell(`K${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`J${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`K${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------ABRIL-------------------------------
+ iPrevValue = Number(sheet.cell(`L${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`K${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`L${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------MAYO-------------------------------
+ iPrevValue = Number(sheet.cell(`M${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`L${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`M${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------JUNIO-------------------------------
+ iPrevValue = Number(sheet.cell(`N${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`M${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`N${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------JULIO-------------------------------
+ iPrevValue = Number(sheet.cell(`O${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`N${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`O${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------AGOSTO-------------------------------
+ iPrevValue = Number(sheet.cell(`P${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`O${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`P${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------SEPTIEMBRE-------------------------------
+ iPrevValue = Number(sheet.cell(`Q${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`P${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`Q${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------OCTUBRE-------------------------------
+ iPrevValue = Number(sheet.cell(`R${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`Q${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`R${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------NOVIEMBRE-------------------------------
+ iPrevValue = Number(sheet.cell(`S${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`R${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`S${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------DICIEMBRE-------------------------------
+ iPrevValue = Number(sheet.cell(`T${acufil - 1}`).value()) || '';
+ hCurrentValue = Number(sheet.cell(`S${acufil}`).value()) || '';
+
+ newIValue = iPrevValue === ''
+    ? ''
+    : hCurrentValue === ''
+    ? iPrevValue
+    : iPrevValue + hCurrentValue;
+
+sheet.cell(`T${acufil}`)
+    .value(newIValue)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00'
+    });
+
+//------------------TOTAL-------------------------------
+ 
+sheet.cell(`U${acufil}`)
+    .value(obra.presupuesto)
+    .style({
+        border: {
+            bottom: { style: "thin", color: "000000" },
+            top: { style: "thin", color: "000000" },
+            right: { style: "thin", color: "000000" },
+            left: { style: "thin", color: "000000" },
+        },
+        horizontalAlignment: 'center',
+        numberFormat: '$#,##0.00',
+        bold: true, 
+    });
+
+
+}
+
+acufil=acufil+1
+
+}
+
+
 //-----------------ENVIO-------------------------------
 
 const directoryPath = path.join(__dirname, 'files');
@@ -1478,12 +2689,27 @@ fs.mkdirSync(directoryPath, { recursive: true });
 }
 
 // Ruta para guardar el archivo Excel
-const filePath = path.join(directoryPath, `Calendario.xlsx`);
+const filePath = path.join(directoryPath, `Calendario_${Date.now()}.xlsx`);
 
 // Guardar el archivo Excel usando XlsxPopulate
 await workbook.toFileAsync(filePath);
 
-res.download(filePath, `Calendario.xlsx`)
+res.download(filePath, `Calendario.xlsx`, (err) => {
+    // Callback que se ejecuta después de que el archivo es descargado o ocurre un error
+    if (err) {
+        console.error('Error al descargar el archivo:', err);
+    }
+
+    // Eliminar el archivo
+    fs.unlink(filePath, (deleteErr) => {
+        if (deleteErr) {
+
+        } else {
+ 
+        }
+    });
+});
+
 
 } catch (error) {
      console.log(error);
