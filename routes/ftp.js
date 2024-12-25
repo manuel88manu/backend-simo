@@ -7,13 +7,13 @@
 const {Router}=require('express')
 const {check}=require('express-validator')
 const multer = require("multer");
-const { subirArchivo, testConnection } = require('../controllers/ftp');
+const { subirArchivo, testConnection, guardarEnlace } = require('../controllers/ftp');
 const upload = require('../middlewares/multer-middle');
 const router=Router();
 
 router.post('/upload',upload.single('file'), subirArchivo);
 
-router.post('/conexion',upload.single('file'),testConnection)
+router.post('/enlace',guardarEnlace)
 
  
 module.exports=router;
