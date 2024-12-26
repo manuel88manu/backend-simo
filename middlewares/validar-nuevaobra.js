@@ -1,5 +1,5 @@
 const { check, validationResult } = require('express-validator');
-
+const currentYear = new Date().getFullYear();
 // Middleware de validación
 const validarNuevaObrayDicatamen = [
     check('Presupuesto_idPresupuesto')
@@ -76,22 +76,53 @@ const validarNuevaObrayDicatamen = [
             .optional() // Este campo es opcional
             .isISO8601().withMessage('La fecha del dictamen debe estar en formato válido'),
 
-        check('dictamen.fec_inicio')
-            .notEmpty().withMessage('La fecha de inicio es obligatoria')
-            .isISO8601().withMessage('La fecha de inicio debe estar en formato válido'),
+check('dictamen.fec_inicio')
+    .notEmpty().withMessage('La fecha de inicio es obligatoria')
+    .isISO8601().withMessage('La fecha de inicio debe estar en formato válido')
+    .custom(value => {
+        const fechaInicio = new Date(value);
+        
+        // Asegurarse de que la fecha está en el año correcto (sin la influencia de la zona horaria)
+        const year = fechaInicio.getUTCFullYear();
+        const currentYear = new Date().getUTCFullYear();
 
-            check('dictamen.fec_termino')
-            .notEmpty().withMessage('La fecha de término es obligatoria')
-            .isISO8601().withMessage('La fecha de término debe estar en formato válido')
-            .custom((value, { req }) => {
-                const fechaInicio = new Date(req.body.dictamen.fec_inicio);
-                const fechaTermino = new Date(value);
-    
-                if (fechaTermino < fechaInicio) {
-                    throw new Error('La fecha de término no puede ser anterior a la fecha de inicio');
-                }
-                return true;
-            }),
+        console.log('Fecha de inicio:', fechaInicio);
+        console.log('Año de la fecha de inicio:', year);
+        console.log('Año actual:', currentYear);
+
+        if (year !== currentYear) {
+            throw new Error(`La fecha de inicio debe pertenecer al año ${currentYear}`);
+        }
+        return true;
+    }),
+
+check('dictamen.fec_termino')
+    .notEmpty().withMessage('La fecha de término es obligatoria')
+    .isISO8601().withMessage('La fecha de término debe estar en formato válido')
+    .custom((value, { req }) => {
+        const fechaInicio = new Date(req.body.dictamen.fec_inicio);
+        const fechaTermino = new Date(value);
+
+        // Verificar que las fechas sean válidas
+        if (isNaN(fechaInicio) || isNaN(fechaTermino)) {
+            throw new Error('Las fechas proporcionadas no son válidas');
+        }
+
+        // Verificar que término >= inicio
+        if (fechaTermino < fechaInicio) {
+            throw new Error('La fecha de término no puede ser anterior a la fecha de inicio');
+        }
+
+        // Verificar que término esté en el año actual
+        const year = fechaTermino.getUTCFullYear();
+        const currentYear = new Date().getUTCFullYear();
+
+        if (year !== currentYear) {
+            throw new Error(`La fecha de término debe pertenecer al año ${currentYear}`);
+        }
+
+        return true;
+    }),
 
         check('dictamen.metas_alc_fechas')
             .notEmpty().withMessage('La fecha de metas alcanzadas es obligatoria')

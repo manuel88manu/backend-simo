@@ -6,7 +6,7 @@ const { ejecutarConsulta } = require('../database/config');
 const agregarObra = async (req, res = express.response) => {
     try {
         const { Presupuesto_idPresupuesto, obra, dictamen } = req.body;
-
+   
         // Verificar si el presupuesto existe
         const PresupuestoExiste = `SELECT tipo FROM presupuesto WHERE idPresupuesto = ?`;
         const resultadoPresupuesto = await ejecutarConsulta(PresupuestoExiste, [Presupuesto_idPresupuesto]);
@@ -1735,6 +1735,42 @@ const buscarObras=async(req, res = express.response) => {
  }
 }
 
+const obtenerInfo=async(req, res = express.response) => {
+try {
+
+        const {idobra}=req.query
+
+        const obraresult= await ejecutarConsulta(`select * from obra where idobra=?`,[idobra])
+        const obra= obraresult[0]
+
+        const experesult= await ejecutarConsulta(`select * from expediente where obra_idobra=?`,[idobra])
+        const expediente= experesult[0]
+
+        const dictresult= await ejecutarConsulta(`select * from dictamen where obra_idobra=?`,[idobra])
+        const dictamen= dictresult[0]
+
+        
+        const partidas= await ejecutarConsulta(`select * from partida where obra_idobra=?`,[idobra])
+
+        return res.status(200).json({
+        ok: true,
+        msg: 'Todo Bien',
+        obra,
+        expediente,
+        dictamen,
+        partidas
+        });
+
+} catch (error) {
+     return res.status(500).json({
+        ok: false,
+        msg: 'Algo salió mal.',
+        error: error.message,
+    });
+}
+
+}
+
 module.exports = {
     agregarObra,
     agregarPartida,
@@ -1749,5 +1785,6 @@ module.exports = {
     eliminarObra,
     obtenerObrasTipoPresu,
     actualizarNumAproba,
-    buscarObras
+    buscarObras,
+    obtenerInfo
 };

@@ -1192,7 +1192,7 @@ local.value(info.localidad.toUpperCase())
 
 //-------PARTIDAS Y MONTO CON IVA-----------------
 
-const resultado = partidas.map(partida => [partida.nombre_par, Math.round((partida.monto_tot)*1.16)]);
+const resultado = partidas.map(partida => [partida.nombre_par, parseFloat((partida.monto_tot * 1.16).toFixed(2))]);
 
 let fila=17
 
@@ -1221,7 +1221,7 @@ bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
 
 sheet.cell(`F${fila}`).value((resultado[i][1])/(obra.presupuesto)).style(
 {
-numberFormat: '0%',
+numberFormat: '0.00%',
 horizontalAlignment: 'center',
 border: {
 right:{ style: "thin", color: "000000" },
@@ -1261,7 +1261,7 @@ sheet.cell(`I${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1277,7 +1277,7 @@ sheet.cell(`J${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1293,7 +1293,7 @@ sheet.cell(`K${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1309,7 +1309,7 @@ sheet.cell(`L${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1325,7 +1325,7 @@ sheet.cell(`M${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1341,7 +1341,7 @@ sheet.cell(`N${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1357,7 +1357,7 @@ sheet.cell(`O${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1373,7 +1373,7 @@ sheet.cell(`P${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1389,7 +1389,7 @@ sheet.cell(`Q${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1405,7 +1405,7 @@ sheet.cell(`R${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1421,7 +1421,7 @@ sheet.cell(`S${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1437,7 +1437,7 @@ sheet.cell(`T${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1453,7 +1453,7 @@ sheet.cell(`U${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1497,7 +1497,7 @@ const totalpor=sheet.cell(`F${fila}`)
 totalpor.value(1).style({
 bold:true,
 fontSize: 10,
-numberFormat: '0%',
+numberFormat: '0.00%',
 fontFamily:'Century Gothic',
 horizontalAlignment:'center',
 border: {
@@ -1517,7 +1517,7 @@ sheet.cell(`I${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 
@@ -1528,7 +1528,7 @@ sheet.cell(`J${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal marzo-----------
@@ -1538,7 +1538,7 @@ sheet.cell(`K${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal abril-----------
@@ -1548,7 +1548,7 @@ sheet.cell(`L${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal mayo-----------
@@ -1558,7 +1558,7 @@ sheet.cell(`M${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal junio-----------
@@ -1568,7 +1568,7 @@ sheet.cell(`N${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal julio-----------
@@ -1578,7 +1578,7 @@ sheet.cell(`O${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal agosto-----------
@@ -1588,7 +1588,7 @@ sheet.cell(`P${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal septiembre-----------
@@ -1598,7 +1598,7 @@ sheet.cell(`Q${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal octubre-----------
@@ -1608,7 +1608,7 @@ sheet.cell(`R${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal noviembre-----------
@@ -1618,7 +1618,7 @@ sheet.cell(`S${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------PorTotal diciembre-----------
@@ -1628,7 +1628,7 @@ sheet.cell(`T${fila}`).value(
 ).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //------TOTAL FINAL-----------
@@ -1636,7 +1636,7 @@ numberFormat: '0%',
 sheet.cell(`U${fila}`).value(1).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
@@ -1750,14 +1750,14 @@ right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
 },
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 })
 
 //febrero
 sheet.cell(`J${acufil}`).value(sheet.cell(`J${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1770,7 +1770,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`K${acufil}`).value(sheet.cell(`K${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1783,7 +1783,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`L${acufil}`).value(sheet.cell(`L${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1796,7 +1796,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`M${acufil}`).value(sheet.cell(`M${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1809,7 +1809,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`N${acufil}`).value(sheet.cell(`N${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1822,7 +1822,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`O${acufil}`).value(sheet.cell(`O${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1835,7 +1835,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`P${acufil}`).value(sheet.cell(`P${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1848,7 +1848,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`Q${acufil}`).value(sheet.cell(`Q${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1861,7 +1861,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`R${acufil}`).value(sheet.cell(`R${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1874,7 +1874,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`S${acufil}`).value(sheet.cell(`S${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1887,7 +1887,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`T${acufil}`).value(sheet.cell(`T${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1900,7 +1900,7 @@ left:{ style: "thin", color: "000000" },
 sheet.cell(`U${acufil}`).value(sheet.cell(`U${fila}`).value()).style(
 {
 horizontalAlignment: 'center',  
-numberFormat: '0%',
+numberFormat: '0.00%',
 border: {
 bottom: { style: "thin", color: "000000" },
 top: { style: "thin", color: "000000" },
@@ -1932,7 +1932,7 @@ sheet.cell(`I${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------Febrero-------------------------------
@@ -1955,7 +1955,7 @@ sheet.cell(`J${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------MARZO-------------------------------
@@ -1978,7 +1978,7 @@ sheet.cell(`K${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------ABRIL-------------------------------
@@ -2001,7 +2001,7 @@ sheet.cell(`L${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------MAYO-------------------------------
@@ -2024,7 +2024,7 @@ sheet.cell(`M${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------JUNIO-------------------------------
@@ -2047,7 +2047,7 @@ sheet.cell(`N${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------JULIO-------------------------------
@@ -2070,7 +2070,7 @@ sheet.cell(`O${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------AGOSTO-------------------------------
@@ -2093,7 +2093,7 @@ sheet.cell(`P${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------SEPTIEMBRE-------------------------------
@@ -2116,7 +2116,7 @@ sheet.cell(`Q${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------OCTUBRE-------------------------------
@@ -2139,7 +2139,7 @@ sheet.cell(`R${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------NOVIEMBRE-------------------------------
@@ -2162,7 +2162,7 @@ sheet.cell(`S${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------DICIEMBRE-------------------------------
@@ -2185,7 +2185,7 @@ sheet.cell(`T${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
     });
 
 //------------------TOTAL-------------------------------
@@ -2200,7 +2200,7 @@ sheet.cell(`U${acufil}`)
             left: { style: "thin", color: "000000" },
         },
         horizontalAlignment: 'center',
-        numberFormat: '0%',
+        numberFormat: '0.00%',
         bold: true, 
     });
 
