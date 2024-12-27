@@ -79,7 +79,62 @@ try {
 
 }
 
+const descargarEnlace = async (req, res = express.response) => { 
+  const fileUrl = req.query.url;
+
+  if (!fileUrl) {
+    return res.status(400).json({ error: "La URL del archivo es requerida" });
+  }
+
+  // Extraer la ruta relativa del archivo
+  const ftpPath = fileUrl.replace(`ftp://${ftpConfig.host}`, "");
+
+  const downloadsPath = path.join(__dirname, "downloads");
+  if (!fs.existsSync(downloadsPath)) {
+    fs.mkdirSync(downloadsPath);
+  }
+
+  const localDownloadPath = path.join(
+    downloadsPath,
+    path.basename(ftpPath)
+  );
+
+  const client = new ftp.Client();
+  client.ftp.verbose = true;
+
+  try {
+    // Conexión al servidor FTP
+    await client.access(ftpConfig);
+
+    // Descargar el archivo desde el servidor FTP
+    console.log("Ruta remota:", ftpPath);
+    console.log("Guardando en:", localDownloadPath);
+    await client.downloadTo(localDownloadPath, ftpPath);
+
+    // Enviar el archivo descargado al cliente
+    res.download(localDownloadPath, (err) => {
+      if (err) {
+        console.error("Error al enviar el archivo al cliente:", err);
+        return res.status(500).json({ error: "Error al enviar el archivo" });
+      }
+      // Borrar el archivo local después de enviarlo
+      fs.unlinkSync(localDownloadPath);
+    });
+  } catch (error) {
+    console.error("Error al procesar la descarga:", error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Algo salió mal.",
+      error: error.message,
+    });
+  } finally {
+    // Cerrar la conexión FTP
+    client.close();
+  }
+};
+
 module.exports = {
     subirArchivo,
-    guardarEnlace
+    guardarEnlace,
+    descargarEnlace
 }
