@@ -6,6 +6,7 @@ const ftp = require('basic-ftp');  // Asegúrate de instalar el paquete `basic-f
 const { ftpConfig } = require('../ftpserver/config');
 const { body } = require('express-validator');
 const { ejecutarConsulta } = require('../database/config');
+const archiver = require("archiver");
 
 
 const subirArchivo = async (req, res = express.response) => {
@@ -133,8 +134,118 @@ const descargarEnlace = async (req, res = express.response) => {
   }
 };
 
+const descargarCarpeta = async (req, res = express.response) => {
+  const folderUrl = req.query.url;
+
+  if (!folderUrl) {
+    return res.status(400).json({ error: "La URL de la carpeta es requerida" });
+  }
+
+  // Extraer la ruta relativa de la carpeta
+  const ftpFolderPath = folderUrl.replace(`ftp://${ftpConfig.host}`, "").replace(/\/$/, "");
+  console.log(ftpFolderPath);
+
+  const downloadsPath = path.join(__dirname, "downloads");
+
+  if (!fs.existsSync(downloadsPath)) {
+    fs.mkdirSync(downloadsPath);
+  }
+
+  const localFolderPath = path.join(downloadsPath, path.basename(ftpFolderPath));
+
+  // Crear la carpeta local donde se guardarán los archivos
+  if (!fs.existsSync(localFolderPath)) {
+    fs.mkdirSync(localFolderPath);
+  }
+
+  const client = new ftp.Client();
+  client.ftp.verbose = true;
+
+  try {
+    // Conexión al servidor FTP
+    await client.access(ftpConfig);
+
+    // Función recursiva para descargar los archivos de la carpeta
+    const descargarArchivosDeCarpeta = async (ftpPath, localPath) => {
+      // Listar archivos en la carpeta FTP
+      const items = await client.list(ftpPath);
+
+      for (const item of items) {
+        let remoteFilePath = path.join(ftpPath.replace(/\\/g, '/'), item.name);
+        remoteFilePath = remoteFilePath.replace(/^\/+/, "");
+
+        const localFilePath = path.join(localPath, item.name);
+
+        if (item.isDirectory) {
+          // Si es un directorio, crear una carpeta local y llamar recursivamente
+          if (!fs.existsSync(localFilePath)) {
+            fs.mkdirSync(localFilePath);
+          }
+          await descargarArchivosDeCarpeta(remoteFilePath, localFilePath);
+        } else {
+          // Si es un archivo, descargarlo
+          console.log(`Descargando archivo: ${remoteFilePath.replace(/\\/g, '/')}`);
+          await client.downloadTo(localFilePath, remoteFilePath.replace(/\\/g, '/'));
+        }
+      }
+    };
+
+    // Llamar a la función para descargar toda la carpeta
+    await descargarArchivosDeCarpeta(ftpFolderPath, localFolderPath);
+
+    // Crear archivo ZIP usando `archiver`
+    const zipFileName = `${path.basename(localFolderPath)}.zip`;
+    const zipFilePath = path.join(downloadsPath, zipFileName);
+
+    const archive = archiver("zip", { zlib: { level: 9 } }); // Mejor compresión
+    const output = fs.createWriteStream(zipFilePath);
+
+    // Conectar el flujo de salida del ZIP
+    archive.pipe(output);
+
+    // Agregar la carpeta descargada al archivo ZIP
+    archive.directory(localFolderPath, false);
+
+    // Finalizar el archivo ZIP
+    await archive.finalize();
+
+    // Esperar a que se complete la escritura del archivo ZIP
+    output.on("close", () => {
+      console.log(`Archivo ZIP creado: ${zipFilePath} (${archive.pointer()} bytes)`);
+
+      // Enviar el archivo ZIP como respuesta
+      res.download(zipFilePath, zipFileName, (err) => {
+        if (err) {
+          console.error("Error al enviar el archivo ZIP:", err);
+          return res.status(500).json({
+            ok: false,
+            msg: "Hubo un problema al enviar el archivo ZIP.",
+            error: err.message,
+          });
+        }
+
+        // Eliminar el archivo ZIP temporal después de enviarlo
+        fs.unlinkSync(zipFilePath);
+        fs.rmSync(localFolderPath, { recursive: true, force: true });
+      });
+    });
+
+  } catch (error) {
+    console.error("Error al procesar la descarga de la carpeta:", error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Algo salió mal.",
+      error: error.message,
+    });
+  } finally {
+    // Cerrar la conexión FTP
+    client.close();
+  }
+};
+
 module.exports = {
     subirArchivo,
     guardarEnlace,
-    descargarEnlace
+    descargarEnlace,
+    descargarCarpeta
 }
