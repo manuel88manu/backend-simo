@@ -88,6 +88,7 @@ const loginUsuario = async (req, res = express.response) => {
             ok:true,
             uid:usuario.idusuario,
             name:usuario.nombre,
+            rol:usuario.rol,
             token
         });
 
