@@ -1622,7 +1622,8 @@ const obtenerObrasTipoPresu=async(req, res = express.response) => {
             CONCAT('CANTIDAD: ', cap_cantidad, ' ', cap_unidad, '<br>BENEFICIADOS: ', bene_cantidad, ' ', bene_unidad) AS metas
             FROM obra
             WHERE Presupuesto_idPresupuesto = ? 
-            AND num_obra=?`,
+            AND num_obra=?
+            ORDER BY idobra DESC`,
             [idPresupuesto,num_obra])
         if(obrasNum.length==0){
           obrasEncontradas=[]
@@ -1634,7 +1635,8 @@ const obtenerObrasTipoPresu=async(req, res = express.response) => {
             `SELECT *,
             CONCAT('CANTIDAD: ', cap_cantidad, ' ', cap_unidad, '<br>BENEFICIADOS: ', bene_cantidad, ' ', bene_unidad) AS metas
             FROM obra
-            WHERE Presupuesto_idPresupuesto = ?;`,
+            WHERE Presupuesto_idPresupuesto = ?
+            ORDER BY idobra DESC;`,
         [idPresupuesto])  
 
             if(obras.length===0){
@@ -1771,6 +1773,45 @@ try {
 
 }
 
+
+const obtenerTipo=async(req, res = express.response) => {
+try {
+       const {idobra}=req.query
+
+        const resulTipo=await ejecutarConsulta(`SELECT 
+                                    p.tipo AS tipo_presupuesto
+                                FROM 
+                                    obra o
+                                INNER JOIN 
+                                    presupuesto p
+                                ON 
+                                    o.Presupuesto_idPresupuesto = p.idPresupuesto
+                                WHERE 
+                                    o.idobra = ?;`,[idobra])
+
+      if(resulTipo.length===0){
+            return res.status(401).json({
+            ok: false,
+            msg:`La obra no existe en la base de datos`
+        });
+        }
+
+      const tipo=resulTipo[0].tipo_presupuesto
+        
+        return res.status(200).json({
+        ok: true,
+        msg: 'Todo Bien',
+        tipo
+        });   
+} catch (error) {
+       return res.status(500).json({
+        ok: false,
+        msg: 'Algo salió mal.',
+        error: error.message,
+    });
+}
+}
+
 module.exports = {
     agregarObra,
     agregarPartida,
@@ -1786,5 +1827,6 @@ module.exports = {
     obtenerObrasTipoPresu,
     actualizarNumAproba,
     buscarObras,
-    obtenerInfo
+    obtenerInfo,
+    obtenerTipo
 };

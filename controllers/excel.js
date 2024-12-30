@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const XlsxPopulate = require('xlsx-populate'); // Usar la librería xlsx-populate
 const express = require('express');
+const { validarExpediente } = require('../helpers/funciones');
 
 const crearCedula = async (req, res = express.response) => {
 try {
@@ -2719,11 +2720,369 @@ msg: 'Error en la creación del archivo.',
 }
 
 }
+
+const crearDictamen= async (req, res=express.response)=>{
+try {
+
+   const {obra,dictamen,partidas,infoexp,expediente,tipo}=req.body
+   const rutaDoc = path.join(__dirname, 'files', 'Dictamen Plantilla.xlsx'); 
+   const workbook=await XlsxPopulate.fromFileAsync(rutaDoc)
+   const sheet= workbook.sheet(0)
+
+ //------------PRIMERA TABLA-------------------------
+   const nombreobra= sheet.cell('F8')
+   nombreobra.value(obra.nombre.toUpperCase())
+
+   const locali= sheet.cell('S9')
+   locali.value(obra.loca_col)
+
+   const progra=sheet.cell('F11')
+   progra.value(obra.programa)
+
+   const subprogra=sheet.cell('F12')
+   subprogra.value(obra.subprograma)
+
+//----------------------FECHA------------------------
+const meses = [
+  'ene', 'feb', 'mar', 'abr', 'may', 'jun', 
+  'jul', 'ago', 'sep', 'oct', 'nov', 'dic'
+];
+
+const fechaHoy = new Date();
+let dia = fechaHoy.getDate(); // Día del mes
+let mes = meses[fechaHoy.getMonth()]; // Nombre del mes
+let año = fechaHoy.getFullYear(); // Año actual
+
+const fechadic=sheet.cell('S12')
+fechadic.value(`${dia}-${mes}-${año}`)
+
+const fechametas = new Date(dictamen.metas_alc_fechas); // Forzar local time
+
+ dia = fechametas.getDate(); // Día del mes
+ mes = meses[fechametas.getMonth()]; // Nombre del mes
+ año = fechametas.getFullYear(); // Año actual
+
+const fechadicmet=sheet.cell('S15')
+fechadicmet.value(`AL ${dia} DE ${mes.toUpperCase()} ${año}`)
+
+const total= sheet.cell('C16')
+total.value(obra.presupuesto)
+
+if(tipo==='odirectas'){
+  sheet.cell('K14').value('OBRAS DIRECTAS')
+  sheet.cell('K16').value(obra.presupuesto)
+}
+else if(tipo==='faismun'){
+  sheet.cell('K14').value('MUNICIPAL FAISMUN')
+  sheet.cell('M16').value(obra.presupuesto)
+}
+else if(tipo==='fortamun'){
+  sheet.cell('K14').value('MUNICIPAL FORTAMUN')
+  sheet.cell('M16').value(obra.presupuesto)
+}
+else if(tipo==='estatal'){
+  sheet.cell('J16').value(obra.presupuesto)
+}
+else{
+  sheet.cell('G16').value(obra.presupuesto)
+}
+
+const ejecu=sheet.cell('C21')
+ejecu.value(obra.ejecucion.toUpperCase())
+
+
+const fechaini = new Date(dictamen.fec_inicio); // Forzar local time
+
+ dia = fechaini.getDate(); // Día del mes
+ mes = meses[fechaini.getMonth()]; // Nombre del mes
+ año = fechaini.getFullYear(); // Año actual
+
+const incioFec=sheet.cell('E20')
+incioFec.value(`${mes}-${año}`)
+
+
+
+const fechafin = new Date(dictamen.fec_termino); // Forzar local time 
+
+ dia = fechafin.getDate(); // Día del mes
+ mes = meses[fechafin.getMonth()]; // Nombre del mes
+ año = fechafin.getFullYear(); // Año actual
+
+const FinFech=sheet.cell('G20')
+FinFech.value(`${mes}-${año}`)
+
+const unicap=sheet.cell('H20')
+unicap.value(obra.cap_unidad.toUpperCase())
+
+const cantcap=sheet.cell('J20')
+cantcap.value(obra.cap_cantidad)
+
+const unibene=sheet.cell('M20')
+unibene.value(obra.bene_unidad.toUpperCase())
+
+const cantbene=sheet.cell('N20')
+cantbene.value(obra.bene_cantidad)
+
+const empleo=sheet.cell('P20')
+empleo.value(obra.empleo_event)
+
+const resulDic=sheet.cell('Q20')
+resulDic.value(infoexp.resultado.toUpperCase())
+
+
+//----------------------SEGUNDA TABLA---------------------------
+
+//++++++++++++++++++PARTIDAS+++++++++++++++++++++++++++++++++++
+const resulPartidas = partidas.map(partida => [partida.nombre_par,partida.monto_tot ]);
+
+let partiVal=25
+
+for (let i = 0; i < resulPartidas.length; i++) {
+
+sheet.range(`C${partiVal}:I${partiVal}`).merged(true).value(resulPartidas[i][0].toUpperCase()).style({bold: true, border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+}
+}) 
+
+sheet.cell(`J${partiVal}`).value('P.G.').style({bold: false, border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',
+}) 
+
+sheet.range(`K${partiVal}:L${partiVal}`).merged(true).value(1).style({bold: false, border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',
+}) 
+
+sheet.cell(`M${partiVal}`).value('P.G.').style({bold: false, border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'center',
+}) 
+
+sheet.range(`N${partiVal}:O${partiVal}`).merged(true).value(resulPartidas[i][1]).style({bold: false, border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+numberFormat: '#,##0.00',
+}) 
+
+sheet.cell(`S${partiVal}`).style({bold: false, border: {
+right:{ style: "thin", color: "000000" },
+}
+}) 
+
+
+partiVal=partiVal+1
+}
+
+//++++++++++++++++++++++OBSERVACIONES+++++++++++++++++++++
+function calcularColumnasNecesarias(texto, anchoColumna) {
+  if (!texto || texto.length === 0) return 1; // Mínimo 1 fila
+
+  // Contar los saltos de línea explícitos
+  const lineas = texto.split("\n");
+  let totalFilas = 0;
+
+  // Calcular filas necesarias para cada línea
+  lineas.forEach(linea => {
+    totalFilas += Math.ceil(linea.length / anchoColumna);
+  });
+
+  return totalFilas;
+}
+
+const anchoColumna = 41.34; 
+
+const expeincom=validarExpediente(expediente)
+
+const StrinObserva=infoexp.observa+'\n'+expeincom
+
+const columnas = calcularColumnasNecesarias(StrinObserva, anchoColumna);
+
+
+let observaVal=columnas+26
+
+const areaObseva= sheet.range(`P26:S${observaVal}`).merged(true).style({bold: false, border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+},
+horizontalAlignment: 'left',
+verticalAlignment: 'top', 
+wrapText: true
+})
+
+areaObseva.value(StrinObserva)
+
+//---------------Firma---------------------------
+
+
+let mayorValFirma = partiVal >= observaVal+1 ? partiVal : observaVal+1;
+
+const  iniciFir=mayorValFirma;
+
+mayorValFirma=mayorValFirma+1
+
+
+const dicta= sheet.range(`Q${mayorValFirma}:R${mayorValFirma}`)
+dicta.merged(true).value('DICTAMINO').style({bold: true,horizontalAlignment: 'center'})
+
+mayorValFirma=mayorValFirma+3
+
+const firNom= sheet.range(`P${mayorValFirma}:S${mayorValFirma}`)
+firNom.merged(true).value(infoexp.nombre.toUpperCase()).style({bold: true,horizontalAlignment: 'center'})
+
+
+mayorValFirma=mayorValFirma+2
+
+const bordesFirmasiz=sheet.range(`P${iniciFir}:P${mayorValFirma}`)
+bordesFirmasiz.style({border: {
+left:{ style: "thin", color: "000000" },
+}})
+
+const bordesFirmasder=sheet.range(`S${iniciFir}:S${mayorValFirma}`)
+bordesFirmasder.style({border: {
+right:{ style: "thin", color: "000000" },
+}})
+
+const bordesFirmasbajo=sheet.range(`P${mayorValFirma}:S${mayorValFirma}`)
+bordesFirmasbajo.style({border: {
+top:{ style: "thin", color: "000000" },
+}})
+
+
+///--------------TABLA COMPLETA PARTIDAS -----------------------
+
+const cuadParti=sheet.range(`C${partiVal}:I${mayorValFirma-1}`)
+cuadParti.merged(true).style({border: {
+bottom:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+}})
+
+const cuadUni=sheet.range(`J${partiVal}:J${mayorValFirma-1}`)
+cuadUni.merged(true).style({border: {
+bottom:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+}})
+
+const cuadCant=sheet.range(`K${partiVal}:L${mayorValFirma-1}`)
+cuadCant.merged(true).style({border: {
+bottom:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+}})
+
+const cuadPuni=sheet.range(`M${partiVal}:M${mayorValFirma-1}`)
+cuadPuni.merged(true).style({border: {
+bottom:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+}})
+
+const cuadImpo=sheet.range(`N${partiVal}:O${mayorValFirma-1}`)
+cuadImpo.merged(true).style({border: {
+bottom:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+right:{ style: "thin", color: "000000" },
+}})
+
+//--------------MONTO CON IVA-----------------------------
+const subtotaltex=sheet.cell(`M${mayorValFirma}`)
+subtotaltex.value('SUBTOTAL')
+
+const subtotalval=sheet.range(`N${mayorValFirma}:O${mayorValFirma}`)
+subtotalval.merged(true).value((obra.presupuesto)/(1.16)).style({
+numberFormat: '#,##0.00',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: { style: "thin", color: "000000" } 
+}
+})
+
+const ivatex=sheet.cell(`M${mayorValFirma+1}`)
+ivatex.value('I.V.A.')
+
+const ivaval=sheet.range(`N${mayorValFirma+1}:O${mayorValFirma+1}`)
+ivaval.merged(true).value((obra.presupuesto)*(0.16 / 1.16)).style({
+numberFormat: '#,##0.00',
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: { style: "thin", color: "000000" } 
+}
+})
+
+
+const totaltex=sheet.cell(`M${mayorValFirma+2}`)
+totaltex.value('TOTAL').style({
+bold:true})
+
+const totalval=sheet.range(`N${mayorValFirma+2}:O${mayorValFirma+2}`)
+totalval.merged(true).value((obra.presupuesto)).style({
+numberFormat: '#,##0.00',
+bold:true,
+border: {
+right:{ style: "thin", color: "000000" },
+left:{ style: "thin", color: "000000" },
+bottom: { style: "thin", color: "000000" } 
+}
+})
+
+//-----------------ENVIO-------------------------------
+
+const directoryPath = path.join(__dirname, 'files');
+
+// Verifica si el directorio existe, si no, lo crea
+if (!fs.existsSync(directoryPath)) {
+fs.mkdirSync(directoryPath, { recursive: true });
+}
+
+// Ruta para guardar el archivo Excel
+const filePath = path.join(directoryPath, `Dictamen_${Date.now()}.xlsx`);
+
+// Guardar el archivo Excel usando XlsxPopulate
+await workbook.toFileAsync(filePath);
+
+res.download(filePath, `Calendario.xlsx`, (err) => {
+    // Callback que se ejecuta después de que el archivo es descargado o ocurre un error
+    if (err) {
+        console.error('Error al descargar el archivo:', err);
+    }
+
+    // Eliminar el archivo
+    fs.unlink(filePath, (deleteErr) => {
+        if (deleteErr) {
+
+        } else {
+ 
+        }
+    });
+});
+
+} catch (error) {
+console.log(error);
+return res.status(400).json({
+ok: false,
+msg: 'Error en la creación del archivo.',
+});      
+}
+}
+
 module.exports = {
 crearCedula,
 crearRegistro,
 crearComuniActa,
 crearFactibilidad,
 crearInversion,
-crearCalendario
+crearCalendario,
+crearDictamen
 };

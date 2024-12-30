@@ -56,6 +56,9 @@ try {
      
       const {obra,prop,url}=req.body
       
+      let resul={}
+
+      if(prop!='arc_dictamen'){
       const query=`UPDATE expediente set ${prop}=? where obra_idobra=?`
 
       await ejecutarConsulta(query,[url,obra.idobra])
@@ -63,12 +66,22 @@ try {
       // Consultar el registro actualizado
       const selectQuery = `SELECT * FROM expediente WHERE obra_idobra = ?`;
       const [registroActualizado] = await ejecutarConsulta(selectQuery, [obra.idobra]);
+      resul={expediente:registroActualizado}
+     }else{
+      const query=`UPDATE dictamen set ${prop}=? where obra_idobra=?`
 
+      await ejecutarConsulta(query,[url,obra.idobra])
+
+      // Consultar el registro actualizado
+      const selectQuery = `SELECT * FROM dictamen WHERE obra_idobra = ?`;
+      const [registroActualizado] = await ejecutarConsulta(selectQuery, [obra.idobra]);
+      resul={dictamen:registroActualizado}            
      
+     }
       return res.status(200).json({
         ok: true,
         msg: 'Todo Bien',
-        expediente:registroActualizado
+        resultado:resul
     });
 } catch (error) {
      return res.status(500).json({
