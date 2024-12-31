@@ -1,5 +1,6 @@
 const express = require('express');
 const { ejecutarConsulta } = require('../database/config');
+const { normalizaHoy } = require('../helpers/funciones');
 
 //const fechaHoy = new Date('2024-12-30T00:00:00Z'); //Prueba
 
@@ -38,20 +39,24 @@ const agregarObra = async (req, res = express.response) => {
         //Fecha y año actual 
         //const fechaHoy = new Date('2024-06-20T00:00:00Z'); //Prueba
 
-        const fechaHoy = new Date();
-        const añoActual = fechaHoy.getUTCFullYear(); 
+        let fechaHoy = new Date();
 
+        // Ajustar la hora a la zona horaria de México (UTC -6)
+        fechaHoy = new Date(fechaHoy.getTime() - (6 * 60 * 60 * 1000)); // Restar 6 horas a UTC
+
+        const añoActual = fechaHoy.getUTCFullYear();  
+    
         //Fecha para faismun, prodim y otros
         const fechaLimitFaismun = new Date(Date.UTC(añoActual, 10, 30)); //30 de noviembre del año actual
         const fechaLimitProdim = new Date(Date.UTC(añoActual, 5, 30)); // 30 de junio del año actual en UTC
-        const fechaLimitOtros = new Date(Date.UTC(añoActual,11, 30)); // 30 de junio del año actual en UTC
+        const fechaLimitOtros = new Date(Date.UTC(añoActual,11, 30)); // 30 de diciembre del año actual en UTC
 
         fechaLimitFaismun.setUTCHours(23, 59, 59, 999);
         fechaLimitProdim.setUTCHours(23, 59, 59, 999);
         fechaLimitOtros.setUTCHours(23, 59, 59, 999);
 
         const tipo=resultadoPresupuesto[0].tipo
-
+        console.log('Hoy',fechaHoy ,'Fechalimite',fechaLimitOtros )
         switch (tipo) {
             case 'faismun':
                 if(fechaHoy>fechaLimitFaismun){
@@ -76,7 +81,8 @@ const agregarObra = async (req, res = express.response) => {
             case 'fortamun':
             case 'odirectas':
             case 'federal':
-                 if(fechaHoy>fechaLimitOtros){
+                 if(fechaHoy>fechaLimitOtros){ 
+                    console.log('Hoy',fechaHoy.toLocaleString('en-US', { timeZone: 'America/Mexico_City' }) ,'Fechalimite',fechaLimitOtros )
                     return res.status(400).json({
                         ok: false,
                         msg: `No es posible agregar una obra ${tipo} ya que la fecha limite es el 30 de Diciembre del presente año`,
@@ -566,7 +572,10 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                     //Fecha y año actual 
                                     //const fechaHoy = new Date('2024-07-01T00:00:00Z'); 
 
-                                    const fechaHoy = new Date();
+                                    let fechaHoy = new Date();
+
+                                    // Ajustar la hora a la zona horaria de México (UTC -6)
+                                    fechaHoy = new Date(fechaHoy.getTime() - (6 * 60 * 60 * 1000)); // Restar 6 horas a UTC
                                     const añoActual = fechaHoy.getUTCFullYear(); 
 
                                     //Fecha para faismun, prodim y otros
@@ -770,7 +779,10 @@ const actualizarPresupuesto = async (req, res = express.response) => {
                                  //Fecha y año actual 
                                     //const fechaHoy = new Date('2024-07-01T00:00:00Z'); 
 
-                                    const fechaHoy = new Date();
+                                    let fechaHoy = new Date();
+
+                                    // Ajustar la hora a la zona horaria de México (UTC -6)
+                                    fechaHoy = new Date(fechaHoy.getTime() - (6 * 60 * 60 * 1000)); // Restar 6 horas a UTC
                                     const añoActual = fechaHoy.getUTCFullYear(); 
 
                                     //Fecha para faismun, prodim y otros

@@ -1156,6 +1156,11 @@ try {
    const workbook=await XlsxPopulate.fromFileAsync(rutaDoc)
    const sheet= workbook.sheet(0)
 
+
+
+const año= sheet.range(`B3:U3`)
+año.value(`DE OBRA O ACCIÓN ${new Date().getFullYear()}`)
+
 const nombreObra= sheet.range('C7:J8')
 nombreObra.value(obra.nombre.toUpperCase())
 

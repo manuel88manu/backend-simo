@@ -55,6 +55,21 @@ const validarExpediente = (obj) => {
   return mensaje === 'EXPEDIENTE TECNICO INCOMPLETO FALTA:' ? '' : mensaje;
 };
 
+    const normalizarFecha = (fecha) => {
+        return {
+            year: fecha.getFullYear(), // Usa getFullYear() para la fecha local
+            month: fecha.getMonth(), // Usa getMonth() para la fecha local
+            day: fecha.getDate() // Usa getDate() para la fecha local
+        };
+    };
+
+
+const normalizaHoy = () => {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+};
+
+
   module.exports={
-    getCurrentDateTime,validarExpediente
+    getCurrentDateTime,validarExpediente,normalizarFecha,normalizaHoy
   }
