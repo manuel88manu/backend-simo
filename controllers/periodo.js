@@ -7,7 +7,11 @@ const { ejecutarConsulta } = require('../database/config');
 
 const buscarPeriodo = async (req, res = express.response) => {
     try {
-        const fechaHoy = new Date();  // Usamos la fecha fija para la prueba
+        
+        let fechaHoy = new Date();
+
+        // Ajustar la hora a la zona horaria de México (UTC -6)
+        fechaHoy = new Date(fechaHoy.getTime() - (6 * 60 * 60 * 1000)); // Restar 6 horas a UTC // Usamos la fecha fija para la prueba
         const añoActual = fechaHoy.getUTCFullYear(); // Año actual (2024) usando getUTCFullYear()
 
         // Definir el rango de fechas para los dos posibles periodos en UTC
@@ -40,6 +44,7 @@ const buscarPeriodo = async (req, res = express.response) => {
 
         // Verificamos si encontramos un periodo
         if (resultado.length === 0) {
+          console.log('Entro')
             return res.status(404).json({
                 ok: false,
                 msg: 'No se encontró un periodo vigente.',
@@ -51,7 +56,7 @@ const buscarPeriodo = async (req, res = express.response) => {
         const fechaFinalPeriodo = new Date(periodo.fecha_final); // Fecha de finalización del periodo
 
         // Comprobamos si el periodo está vencido o si está vigente
-        if (fechaFinalPeriodo < fechaHoy) {
+        if (fechaFinalPeriodo.toISOString().split('T')[0] < fechaHoy.toISOString().split('T')[0]) {
             return res.status(200).json({
                 ok: true,
                 msg: 'El periodo actual ha vencido.',
@@ -78,7 +83,11 @@ const buscarPeriodo = async (req, res = express.response) => {
 const crearPeriodo = async (req, res = express.response) => {
     try {
         const { presupuestos } = req.body; // Obtenemos la fecha de inicio del cuerpo de la petición
-        const fechaInicio = new Date(); // Obtener la fecha actual
+        
+        let fechaInicio = new Date();
+
+        // Ajustar la hora a la zona horaria de México (UTC -6)
+        fechaInicio = new Date(fechaInicio.getTime() - (6 * 60 * 60 * 1000)); // Restar 6 horas a UTC// Obtener la fecha actual
         fechaInicio.setHours(0, 0, 0, 0); // Ajustar a las 00:00:00 de hoy
 
         // Verificar si la fecha de inicio es válida
@@ -97,7 +106,7 @@ const crearPeriodo = async (req, res = express.response) => {
             });
         }
 
-        const añoRegistro = fechaInicio.getFullYear(); // Año de la fecha actual
+        const añoRegistro = fechaInicio.getUTCFullYear(); // Año de la fecha actual
 
         // Fecha final: 31 de diciembre del mismo año
         const fechaFinalActual = new Date(Date.UTC(añoRegistro, 11, 31));  // 31 de diciembre del año actual

@@ -16,11 +16,12 @@ msg: 'No se ha subido ningún archivo' });
 }
 
 let numObra=req.body.num_obra
+const uniqueId = req.body.unique_id || 'default'; 
 
 numObra = numObra.replace(/[\/\\:*?"<>|]/g, '_'); // Sustituye por guion bajo
 
 const localFilePath = req.file.path;  // Ruta del archivo temporal
-const remoteFileName = path.basename(req.file.originalname);  // Nombre del archivo remoto
+const remoteFileName = `${uniqueId}_#${path.basename(req.file.originalname)}`; // Generar un nombre único para el archivo
 const client = new ftp.Client()
 client.ftp.verbose = true;
 
@@ -33,8 +34,19 @@ const remoteFolderPath = `/${numObra}`;
 await client.ensureDir(remoteFolderPath); // Crea la carpeta si no existe
 await client.cd(remoteFolderPath); // Cambia a la carpeta creada
 
+// Buscar y eliminar archivos relacionados con el identificador único
+const fileList = await client.list(remoteFolderPath);
+const filesToDelete = fileList.filter(file => file.name.startsWith(`${uniqueId}_`));
+
+for (const file of filesToDelete) {
+    await client.remove(`${remoteFolderPath}/${file.name}`);
+    console.log(`Archivo eliminado: ${remoteFolderPath}/${file.name}`);
+}
+
+
 // Subir el archivo al servidor FTP dentro de la carpeta específica
 await client.uploadFrom(localFilePath, `${remoteFolderPath}/${remoteFileName}`);
+
 
 // Eliminar el archivo local después de la carga
 fs.unlinkSync(localFilePath);

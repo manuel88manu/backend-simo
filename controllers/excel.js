@@ -2739,7 +2739,7 @@ try {
    nombreobra.value(obra.nombre.toUpperCase())
 
    const locali= sheet.cell('S9')
-   locali.value(obra.loca_col)
+   locali.value(obra.loca_col.toUpperCase())
 
    const progra=sheet.cell('F11')
    progra.value(obra.programa)
