@@ -1755,13 +1755,13 @@ try {
         const {idobra}=req.query
 
         const obraresult= await ejecutarConsulta(`select * from obra where idobra=?`,[idobra])
-        const obra= obraresult[0]
+        const obra= obraresult[0] || {}
 
         const experesult= await ejecutarConsulta(`select * from expediente where obra_idobra=?`,[idobra])
-        const expediente= experesult[0]
+        const expediente= experesult[0] || {}
 
         const dictresult= await ejecutarConsulta(`select * from dictamen where obra_idobra=?`,[idobra])
-        const dictamen= dictresult[0]
+        const dictamen= dictresult[0] || {}
 
         
         const partidas= await ejecutarConsulta(`select * from partida where obra_idobra=?`,[idobra])
