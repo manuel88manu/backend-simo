@@ -220,7 +220,7 @@ const getUsuarios=async(req, res = express.response)=>{
                                                         (correo = ? OR ? = '') 
                                                         AND (DATE(fecha) = ? OR ? IS NULL)  -- Cambié la verificación de cadena vacía a NULL
                                                         AND (YEAR(fecha) = ? OR ? IS NULL)  -- Cambié la verificación de cadena vacía a NULL
-                                                    ORDER BY fecha DESC;`,
+                                                    ORDER BY fecha DESC LIMIT 100;`,
                                                 [correo,correo,dia,dia,año,año])
         return res.status(200).json({
             ok: true,
