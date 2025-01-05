@@ -62,51 +62,81 @@ bottom: { style: "thin", color: "000000" },
 }
 }) 
 
-const prog=sheet.cell('A11')
-prog.value('PROGRAMA').style({bold: true, 
-fontSize: 10,
-fontFamily:'Century Gothic',})
-
-const text = `${obra.programa}`;
-const rows = Math.ceil(text.length / 50); // Aproximadamente el número de líneas necesarias si cada línea tiene 50 caracteres
-sheet.row(11).height(rows * 15); // Ajusta la altura de la fila 11 en función del número de líneas (multiplicado por un valor que determine el alto por línea)
-
-const progval = sheet.range('B11:E11');
-progval.merged(true).value(text).style({
-fontSize: 10,
-fontFamily: 'Century Gothic',
-wrapText: true // Establece el ajuste de texto
+const prog = sheet.cell('A11');
+prog.value('PROGRAMA').style({
+  bold: true,
+  fontSize: 10,
+  fontFamily: 'Century Gothic',
 });
 
-progval.style({border: {
-bottom: { style: "thin", color: "000000" },
+const text = `${obra.programa}`;
 
-}
-}) 
+// Dimensiones del rango combinado
+const totalColumns = 4; // Número de columnas combinadas (B11:E11 = 4 columnas)
+const columnanch = 10; // Ancho promedio de cada columna en caracteres
+const combinedWidth = totalColumns * columnanch; // Ancho total del rango combinado
+
+// Estimación de líneas necesarias
+const lines = Math.ceil(text.length / combinedWidth);
+
+// Altura necesaria para la fila
+const estimatedLineHeight = 15; // Altura estimada por línea
+const requiredHeight = lines * estimatedLineHeight; // Altura total necesaria
+sheet.row(11).height(requiredHeight); // Ajustar la altura de la fila
+
+// Configuración del rango combinado y estilos
+const progval = sheet.range('B11:E11');
+progval.merged(true).value(text).style({
+  fontSize: 10,
+  fontFamily: 'Century Gothic',
+  wrapText: true, // Asegura que el texto se ajuste dentro de las celdas combinadas
+});
+
+// Bordes
+progval.style({
+  border: {
+    bottom: { style: "thin", color: "000000" },
+  },
+});
 
 //------------Subprograma------------------
 
-const subprog=sheet.cell('A12')
-subprog.value('SUBPROGRAMA').style({bold: true, 
-fontSize: 10,
-fontFamily:'Century Gothic',})
-
-const textsub = `${obra.subprograma}`;
-const rowsub = Math.ceil(textsub.length / 50); // Aproximadamente el número de líneas necesarias si cada línea tiene 50 caracteres
-sheet.row(12).height(rowsub * 15); // Ajusta la altura de la fila 11 en función del número de líneas (multiplicado por un valor que determine el alto por línea)
-
-const subprogval = sheet.range('B12:E12');
-subprogval.merged(true).value(textsub).style({
-fontSize: 10,
-fontFamily: 'Century Gothic',
-wrapText: true // Establece el ajuste de texto
+const subprog = sheet.cell('A12');
+subprog.value('SUBPROGRAMA').style({
+  bold: true,
+  fontSize: 10,
+  fontFamily: 'Century Gothic',
 });
 
-subprogval.style({border: {
-bottom: { style: "thin", color: "000000" },
+const textsub = `${obra.subprograma}`;
 
-}
-}) 
+// Dimensiones del rango combinado
+const totalColumnsSub = 4; // Número de columnas combinadas (B12:E12 = 4 columnas)
+const columnWidthSub = 10; // Ancho promedio de cada columna en caracteres
+const combinedWidthSub = totalColumnsSub * columnWidthSub; // Ancho total del rango combinado
+
+// Estimación de líneas necesarias
+const linesSub = Math.ceil(textsub.length / combinedWidthSub);
+
+// Altura necesaria para la fila
+const estimatedLineHeightSub = 15; // Altura estimada por línea
+const requiredHeightSub = linesSub * estimatedLineHeightSub; // Altura total necesaria
+sheet.row(12).height(requiredHeightSub); // Ajustar la altura de la fila
+
+// Configuración del rango combinado y estilos
+const subprogval = sheet.range('B12:E12');
+subprogval.merged(true).value(textsub).style({
+  fontSize: 10,
+  fontFamily: 'Century Gothic',
+  wrapText: true, // Asegura que el texto se ajuste dentro de las celdas combinadas
+});
+
+// Bordes
+subprogval.style({
+  border: {
+    bottom: { style: "thin", color: "000000" },
+  },
+});
 
 //---------------Claves Estadisticas----------------
 const estitu= sheet.range('G12:I12')
@@ -154,7 +184,7 @@ bold: true,
 fontSize: 10,
 fontFamily:'Century Gothic',})
 const localidadTXT= sheet.range('H15:I15')
-localidadTXT.merged(true).value(`${Cedula.localidad}`).style({
+localidadTXT.merged(true).value(`${Cedula.localidad.toUpperCase()}`).style({
 fontSize: 10,
 fontFamily:'Century Gothic',})
 localidadTXT.style({border: {
@@ -895,7 +925,7 @@ fecha.value(`XALISCO, NAYARIT A ${dia} DE ${mes.toUpperCase()} DE ${año}`)
 
 //---------------Nombre de obra-------------------
 const nombre=sheet.range('A21:H26')
-nombre.value(`${obra.nombre}`)
+nombre.value(`${obra.nombre.toUpperCase()}`)
 
 //---------------Nombre de representante-------------------
 const represe=sheet.range('C45:F45')
@@ -979,7 +1009,7 @@ const nomrepre= sheet.range('C44:L44')
 nomrepre.value(`${comunidad.represe.toUpperCase()}`)
 
 const area= sheet.range('C45:L46')
-area.value(`${comunidad.area.toUpperCase()}`)
+area.value(`${comunidad.area.toUpperCase()}`).style({wrapText: true})
 
 
 //-----------------ENVIO-------------------------------
@@ -1207,11 +1237,22 @@ const tamaño=resultado.length
 
 for (let i = 0; i < resultado.length; i++) {
 
+//---------------ALTURA NOMBRE PARTIDAS----------------------------------
+const text = resultado[i][0];
+const combinedWidth = 30; // Ancho total del rango combinado
+// Estimación de líneas necesarias
+const lines = Math.ceil(text.length / combinedWidth);
+// Altura necesaria para la fila
+const estimatedLineHeight = 15; // Altura estimada por línea
+const requiredHeight = lines * estimatedLineHeight; // Altura total necesaria
+sheet.row(fila).height(requiredHeight); // Ajustar la altura de la fila
+
 sheet.range(`B${fila}:D${fila}`).merged(true).value(resultado[i][0]).style({border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
 bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
-}
+},
+wrapText: true,
 }) 
 
 sheet.cell(`E${fila}`).value(resultado[i][1]).style(
