@@ -1253,7 +1253,7 @@ left:{ style: "thin", color: "000000" },
 bottom: i===tamaño-1 ? { style: "thin", color: "000000" } : undefined
 },
 wrapText: true,
-}) 
+})  
 
 sheet.cell(`E${fila}`).value(resultado[i][1]).style(
 {
