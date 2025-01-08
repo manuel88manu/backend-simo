@@ -31,7 +31,9 @@ const validarNuevaObrayDicatamen = [
         .isInt({ min: 1 }).withMessage('La cantidad de beneficiarios debe ser un número entero positivo mayor a 0'),
 
     check('obra.cap_cantidad')
-        .isInt({ min: 1 }).withMessage('La cantidad de capacidad debe ser un número entero positivo mayor a 0'),
+        .notEmpty().withMessage('La cantidad es obligatoria') 
+        .isFloat({ min: 1 })
+        .withMessage('La cantidad debe ser un número flotante mayor a 0'),
 
     check('obra.cap_unidad')
         .notEmpty().withMessage('La unidad de capacidad es obligatoria')

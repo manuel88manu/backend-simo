@@ -1134,7 +1134,7 @@ try {
     const nombrecom= sheet.range('A45:H45')
     nombrecom.value(apoyo.nombre.toUpperCase())
 
-    const cargo=sheet.range('D46:F46')
+    const cargo=sheet.range('A46:H46')
     cargo.value(apoyo.cargo.toUpperCase())
 
     //-----------------ENVIO-------------------------------
@@ -2905,11 +2905,11 @@ left:{ style: "thin", color: "000000" },
 horizontalAlignment: 'center',
 }) 
 
-sheet.cell(`M${partiVal}`).value('P.G.').style({bold: false, border: {
+sheet.cell(`M${partiVal}`).value(resulPartidas[i][1]).style({bold: false, border: {
 right:{ style: "thin", color: "000000" },
 left:{ style: "thin", color: "000000" },
 },
-horizontalAlignment: 'center',
+numberFormat: '#,##0.00',
 }) 
 
 sheet.range(`N${partiVal}:O${partiVal}`).merged(true).value(resulPartidas[i][1]).style({bold: false, border: {
