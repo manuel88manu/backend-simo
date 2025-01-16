@@ -541,7 +541,7 @@ try {
                         ok: false,
                         msg: `El monto inicial es menor que la suma de los presupuestos de las obras, valida que sea mayor o modifica el prespuesto de las obras`,
                     });
-                }
+                } 
             }
         }
 
