@@ -504,9 +504,92 @@ const obtenerFaltante=async (req, res = express.response) => {
     }
 }
 
+
+const actualizarPresu=async (req, res = express.response) => { 
+try {
+
+      const {presupuestos}=req.body
+
+       if (!presupuestos || !Array.isArray(presupuestos)) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'El cuerpo de la solicitud debe contener un array llamado "presupuesto".',
+            });
+        }
+
+
+               const queryVal = `
+            SELECT COALESCE(SUM(o.presupuesto), 0) AS suma_obras
+            FROM obra o
+            WHERE o.Presupuesto_idPresupuesto = ?
+        `;
+
+        // Validar cada presupuesto
+        for (const item of presupuestos) {
+            const monto_inici = Object.values(item)[1]; // El monto enviado en el body
+            const idPresupuesto = item.idPresupuesto;
+
+            // Consultar la suma de los presupuestos de las obras relacionadas con el idPresupuesto
+            const result = await ejecutarConsulta(queryVal, [idPresupuesto]);
+
+            if (result.length > 0) {
+                const sumaObras = result[0].suma_obras;
+
+                // Verificar si el monto_inici es menor que la suma de los presupuestos de las obras
+                if (monto_inici < sumaObras) {
+                    return res.status(400).json({
+                        ok: false,
+                        msg: `El monto inicial es menor que la suma de los presupuestos de las obras, valida que sea mayor o modifica el prespuesto de las obras`,
+                    });
+                }
+            }
+        }
+
+
+        const query1 = `
+            UPDATE presupuesto p
+            JOIN (
+                SELECT ? AS idPresupuesto, ? AS monto_inici
+            ) AS temp
+            ON p.idPresupuesto = temp.idPresupuesto
+            SET p.monto_inici = temp.monto_inici;
+        `;
+       
+         for (const item of presupuestos) {
+            await ejecutarConsulta(query1, [item.idPresupuesto, Object.values(item)[1]]);
+        }
+
+     const ids = presupuestos.map((item) => item.idPresupuesto);
+        const query2 = `
+            UPDATE presupuesto p
+            SET p.monto_rest = p.monto_inici - (
+                SELECT COALESCE(SUM(o.presupuesto), 0)
+                FROM obra o
+                WHERE o.Presupuesto_idPresupuesto = p.idPresupuesto
+            )
+            WHERE p.idPresupuesto IN (?);
+        `;
+         await ejecutarConsulta(query2, [ids]);
+
+      
+
+      return res.status(200).json({
+            ok: true,
+            msg: 'todo bien',
+        });
+} catch (error) {
+     return res.status(500).json({
+            ok: false,
+            msg: 'Algo salió mal.',
+            error: error.message,
+        });
+}
+}
+
 module.exports = {
     buscarPeriodo,
     crearPeriodo,
     obtenerPeriodos,
-    obtenerFaltante
+    obtenerFaltante,
+    actualizarPresu
 };
