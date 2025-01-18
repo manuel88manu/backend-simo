@@ -1,45 +1,58 @@
 const mysql = require('mysql');
 require('dotenv').config();
 
-let conexion;  // Variable global para la conexión
+let pool;  // Variable global para el pool de conexiones
 
-const dbConnection = () => {
-    if (!conexion) {  // Si no hay conexión, la crea
-        conexion = mysql.createConnection({
+// Crear el pool de conexiones
+const createPool = () => {
+    if (!pool) {  // Si no existe el pool, lo crea
+        pool = mysql.createPool({
+            connectionLimit: 10,  // Número máximo de conexiones simultáneas
             host: process.env.MYSQL_HOST,
             user: process.env.MYSQL_USER,
             password: process.env.MYSQL_PASSWORD,
             database: process.env.MYSQL_DB,
         });
 
-        conexion.connect((error) => {
-            if (error) {
-                console.log('Conexión fallida');
-                throw error;
-            } else {
-                console.log('Conexión del DB exitosa');
-            }
+        // Manejo de errores global del pool
+        pool.on('connection', (connection) => {
+            console.log('Conexión al DB establecida');
+        });
+
+        pool.on('error', (err) => {
+            console.error('Error en el pool de conexiones:', err);
+            // Manejo de reconexión en caso de errores del pool (si es necesario)
         });
     }
 
-    return conexion;  // Devuelve siempre la misma conexión
-}
+    return pool;  // Devuelve el pool de conexiones
+};
 
 // Función que devuelve una promesa para ejecutar consultas
 const ejecutarConsulta = (query, params = []) => {
     return new Promise((resolve, reject) => {
-        const conexion = dbConnection();
-        conexion.query(query, params, (error, resultados) => {
-            if (error) {
-                reject(error);
+        const pool = createPool();  // Obtiene el pool de conexiones
+
+        pool.getConnection((err, connection) => {
+            if (err) {
+                reject(err);  // Error al obtener conexión
             } else {
-                resolve(resultados);
+                // Realizar la consulta
+                connection.query(query, params, (error, resultados) => {
+                    connection.release();  // Libera la conexión después de usarla
+
+                    if (error) {
+                        reject(error);  // Si hay error en la consulta
+                    } else {
+                        resolve(resultados);  // Devuelve los resultados
+                    }
+                });
             }
         });
     });
 };
 
 module.exports = {
-    dbConnection,
+    createPool,
     ejecutarConsulta
 };

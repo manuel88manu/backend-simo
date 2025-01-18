@@ -1,36 +1,27 @@
 const express = require('express');
-const cors=require('cors')
-const { dbConnection } = require('./database/config');
+const cors = require('cors');
 require('dotenv').config();
 
-//Crear servidor express
-const app=express();
+// Crear servidor express
+const app = express();
 
-//Base de datos
+// CORS
+app.use(cors());
 
-dbConnection();
+// Lectura y parseo del body
+app.use(express.json());
 
-//CORS
-app.use(cors())
+// RUTAS
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/periody', require('./routes/periodo'));
+app.use('/api/obra', require('./routes/obra'));
+app.use('/api/expedi', require('./routes/expedi'));
+app.use('/api/excel', require('./routes/excel'));
+app.use('/api/ftp', require('./routes/ftp'));
 
-//Lectura y parseo del body
-app.use(express.json())
+const PORT = process.env.PORT || 3000;
 
-//RUTAS
-app.use('/api/auth',require('./routes/auth')) 
-
-app.use('/api/periody',require('./routes/periodo'))
-
-app.use('/api/obra',require('./routes/obra'))
-
-app.use('/api/expedi',require('./routes/expedi'))
-
-app.use('/api/excel',require('./routes/excel'))
-
-app.use('/api/ftp',require('./routes/ftp'))
-
-//Escuchar peticiones 
-app.listen(process.env.PORT,()=>{
-    console.log(`Servidor corriendo en puerto ${process.env.PORT}`)
-})
- 
+// Escuchar peticiones
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+});
